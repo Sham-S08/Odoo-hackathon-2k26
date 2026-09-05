@@ -2,8 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { authApi } from "../api/auth.api";
 import { ROLES } from "../utils/constants";
 
-// Set to true to bypass real API calls during development
-const DEV_MOCK_MODE = true;
+const DEV_MOCK_MODE = import.meta.env.VITE_ENABLE_MOCK_MODE === "true";
 
 const AuthContext = createContext(null);
 
@@ -46,6 +45,32 @@ const MOCK_USERS = {
   },
 };
 
+const BACKEND_TO_FRONTEND_ROLE = {
+  ADMIN: ROLES.ADMIN,
+  SALES: ROLES.SALES,
+  MANAGER: ROLES.MANAGER,
+  FINANCE_MANAGER: ROLES.FINANCE,
+  CUSTOMER: ROLES.CUSTOMER,
+};
+
+const FRONTEND_TO_BACKEND_ROLE = {
+  [ROLES.ADMIN]: "ADMIN",
+  [ROLES.SALES]: "SALES",
+  [ROLES.MANAGER]: "MANAGER",
+  [ROLES.FINANCE]: "FINANCE_MANAGER",
+  [ROLES.CUSTOMER]: "CUSTOMER",
+};
+
+function toFrontendUser(user) {
+  if (!user) return null;
+
+  return {
+    ...user,
+    apiRole: user.role,
+    role: BACKEND_TO_FRONTEND_ROLE[user.role] || user.role?.toLowerCase(),
+  };
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -70,7 +95,7 @@ export function AuthProvider({ children }) {
     }
     authApi
       .me()
-      .then((res) => setUser(res.data))
+      .then((res) => setUser(toFrontendUser(res.data.user)))
       .catch(() => {
         localStorage.removeItem("df360_access_token");
       })
@@ -95,9 +120,10 @@ export function AuthProvider({ children }) {
     }
 
     const res = await authApi.login(credentials);
-    localStorage.setItem("df360_access_token", res.data.accessToken);
-    setUser(res.data.user);
-    return res.data.user;
+    localStorage.setItem("df360_access_token", res.data.token);
+    const user = toFrontendUser(res.data.user);
+    setUser(user);
+    return user;
   }
 
   async function register(payload) {
@@ -115,10 +141,17 @@ export function AuthProvider({ children }) {
       return mockUser;
     }
 
-    const res = await authApi.register(payload);
-    localStorage.setItem("df360_access_token", res.data.accessToken);
-    setUser(res.data.user);
-    return res.data.user;
+    const res = await authApi.register({
+      companyName: payload.company,
+      name: payload.name,
+      email: payload.email,
+      password: payload.password,
+      role: FRONTEND_TO_BACKEND_ROLE[payload.role] || "SALES",
+    });
+    localStorage.setItem("df360_access_token", res.data.token);
+    const user = toFrontendUser(res.data.user);
+    setUser(user);
+    return user;
   }
 
   async function logout() {
