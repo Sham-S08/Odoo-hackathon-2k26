@@ -43,16 +43,16 @@ export default function Sidebar({ role = ROLES.SALES }) {
   const items = NAV_BY_ROLE[role] || [];
 
   return (
-    <aside className="flex h-full w-60 shrink-0 flex-col border-r border-royal-100 bg-white">
+    <aside className="flex h-full w-60 shrink-0 flex-col border-r border-blue-100 bg-white">
       <div className="flex items-center gap-2 px-5 py-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl brand-gradient text-white">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white">
           <Gauge className="h-5 w-5" />
         </div>
         <div>
-          <p className="font-display text-base font-semibold leading-tight text-royal-900">
+          <p className="font-display text-base font-semibold leading-tight text-slate-800">
             DealFlow360
           </p>
-          <p className="text-[11px] leading-tight text-royal-400">Sales Operations</p>
+          <p className="text-[11px] leading-tight text-slate-400">Sales Operations</p>
         </div>
       </div>
 
@@ -65,8 +65,8 @@ export default function Sidebar({ role = ROLES.SALES }) {
             className={({ isActive }) =>
               `flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                 isActive
-                  ? "bg-royal-600 text-white"
-                  : "text-royal-600 hover:bg-royal-50"
+                  ? "bg-blue-600 text-white"
+                  : "text-slate-600 hover:bg-blue-50"
               }`
             }
           >
@@ -76,9 +76,9 @@ export default function Sidebar({ role = ROLES.SALES }) {
         ))}
       </nav>
 
-      <div className="mx-3 mb-4 rounded-xl bg-royal-50 p-3">
-        <p className="text-xs font-medium text-royal-600">Blended risk engine</p>
-        <p className="mt-1 text-[11px] leading-snug text-royal-400">
+      <div className="mx-3 mb-4 rounded-xl bg-blue-50/60 p-3">
+        <p className="text-xs font-medium text-blue-700">Blended risk engine</p>
+        <p className="mt-1 text-[11px] leading-snug text-slate-500">
           Every line is checked against its own discount ceiling before a quote is
           auto-routed for approval.
         </p>
