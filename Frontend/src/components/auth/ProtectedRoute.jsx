@@ -13,6 +13,7 @@ export default function ProtectedRoute({ allowedRoles }) {
   }
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {
+    // Redirect to their own dashboard
     return <Navigate to={`/${user.role}`} replace />;
   }
 

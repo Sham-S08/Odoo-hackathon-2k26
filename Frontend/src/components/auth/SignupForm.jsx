@@ -10,10 +10,19 @@ import { isEmail, isRequired, validatePassword } from "../../utils/validation";
 import { ROLES } from "../../utils/constants";
 
 const ROLE_OPTIONS = [
-  { value: ROLES.SALES, label: "Sales Rep" },
-  { value: ROLES.MANAGER, label: "Sales Manager / Finance" },
+  { value: ROLES.SALES, label: "Sales Representative" },
+  { value: ROLES.MANAGER, label: "Sales Manager" },
+  { value: ROLES.FINANCE, label: "Finance Manager" },
   { value: ROLES.ADMIN, label: "Admin" },
 ];
+
+// Role descriptions for the help text
+const ROLE_DESCRIPTIONS = {
+  [ROLES.SALES]: "Create quotations, respond to customer negotiations",
+  [ROLES.MANAGER]: "Approve/reject quotes, configure discount rules, monitor deal health",
+  [ROLES.FINANCE]: "Second-level approvals, warehouse fulfillment, billing",
+  [ROLES.ADMIN]: "Configure products, price lists, warehouses, subscription plans",
+};
 
 export default function SignupForm() {
   const { register } = useAuthContext();
@@ -28,6 +37,7 @@ export default function SignupForm() {
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [selectedRole, setSelectedRole] = useState(ROLES.SALES);
 
   function validate() {
     const next = {};
@@ -46,7 +56,7 @@ export default function SignupForm() {
     try {
       const user = await register(form);
       notify("Account created. Let's set up your workspace.", "success");
-      navigate(`/${user?.role || "sales"}`);
+      navigate(`/${user?.role || ROLES.SALES}`);
     } catch (err) {
       notify(err.message || "Could not create account", "error");
     } finally {
@@ -99,9 +109,24 @@ export default function SignupForm() {
         name="role"
         options={ROLE_OPTIONS}
         value={form.role}
-        onChange={(e) => setForm({ ...form, role: e.target.value })}
+        onChange={(e) => {
+          const role = e.target.value;
+          setForm({ ...form, role });
+          setSelectedRole(role);
+        }}
       />
-      <Button type="submit" variant="gradient" icon={UserPlus} loading={loading} className="w-full">
+      {selectedRole && ROLE_DESCRIPTIONS[selectedRole] && (
+        <p className="text-xs text-slate-400 -mt-2 pb-1">
+          {ROLE_DESCRIPTIONS[selectedRole]}
+        </p>
+      )}
+      <Button
+        type="submit"
+        variant="primary"
+        icon={UserPlus}
+        loading={loading}
+        className="w-full"
+      >
         Create account
       </Button>
     </form>

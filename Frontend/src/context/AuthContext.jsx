@@ -1,39 +1,47 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { authApi } from "../api/auth.api";
+import { ROLES } from "../utils/constants";
 
-// Set this to true to bypass real API calls during development
+// Set to true to bypass real API calls during development
 const DEV_MOCK_MODE = true;
 
 const AuthContext = createContext(null);
 
-// Mock user data for different roles
+// Mock user data for 5 roles
 const MOCK_USERS = {
   admin: {
     id: "usr_1",
     name: "Priya Shah",
     email: "admin@dealflow360.com",
-    role: "admin",
+    role: ROLES.ADMIN,
     company: "DealFlow360",
   },
   sales: {
     id: "usr_2",
     name: "Marcus Lee",
     email: "sales@dealflow360.com",
-    role: "sales",
+    role: ROLES.SALES,
     company: "DealFlow360",
   },
   manager: {
     id: "usr_3",
     name: "Dana Okafor",
     email: "manager@dealflow360.com",
-    role: "manager",
+    role: ROLES.MANAGER,
+    company: "DealFlow360",
+  },
+  finance: {
+    id: "usr_5",
+    name: "Rahul Sharma",
+    email: "finance@dealflow360.com",
+    role: ROLES.FINANCE,
     company: "DealFlow360",
   },
   customer: {
     id: "usr_4",
     name: "Acme Corp",
     email: "customer@acme.com",
-    role: "customer",
+    role: ROLES.CUSTOMER,
     company: "Acme Corp",
   },
 };
@@ -44,12 +52,9 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     if (DEV_MOCK_MODE) {
-      // Check if we have a mock token in localStorage
       const mockToken = localStorage.getItem("df360_mock_token");
       if (mockToken) {
-        // Try to find user by token (stored as role)
-        const role = mockToken;
-        const mockUser = MOCK_USERS[role];
+        const mockUser = MOCK_USERS[mockToken];
         if (mockUser) {
           setUser(mockUser);
         }
@@ -58,7 +63,6 @@ export function AuthProvider({ children }) {
       return;
     }
 
-    // Real API mode
     const token = localStorage.getItem("df360_access_token");
     if (!token) {
       setLoading(false);
@@ -75,14 +79,14 @@ export function AuthProvider({ children }) {
 
   async function login(credentials) {
     if (DEV_MOCK_MODE) {
-      // Mock login: determine role from email
       const email = credentials.email.toLowerCase();
-      let role = "sales"; // default
+      let role = ROLES.SALES;
 
-      if (email.includes("admin")) role = "admin";
-      else if (email.includes("manager")) role = "manager";
-      else if (email.includes("customer")) role = "customer";
-      else if (email.includes("sales")) role = "sales";
+      if (email.includes("admin")) role = ROLES.ADMIN;
+      else if (email.includes("manager")) role = ROLES.MANAGER;
+      else if (email.includes("finance")) role = ROLES.FINANCE;
+      else if (email.includes("customer")) role = ROLES.CUSTOMER;
+      else if (email.includes("sales")) role = ROLES.SALES;
 
       const mockUser = MOCK_USERS[role];
       localStorage.setItem("df360_mock_token", role);
@@ -90,7 +94,6 @@ export function AuthProvider({ children }) {
       return mockUser;
     }
 
-    // Real API login
     const res = await authApi.login(credentials);
     localStorage.setItem("df360_access_token", res.data.accessToken);
     setUser(res.data.user);
@@ -99,8 +102,7 @@ export function AuthProvider({ children }) {
 
   async function register(payload) {
     if (DEV_MOCK_MODE) {
-      // Mock register: use selected role
-      const role = payload.role || "sales";
+      const role = payload.role || ROLES.SALES;
       const mockUser = {
         id: "usr_new",
         name: payload.name,
@@ -113,7 +115,6 @@ export function AuthProvider({ children }) {
       return mockUser;
     }
 
-    // Real API register
     const res = await authApi.register(payload);
     localStorage.setItem("df360_access_token", res.data.accessToken);
     setUser(res.data.user);

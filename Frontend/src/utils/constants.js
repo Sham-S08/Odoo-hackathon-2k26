@@ -2,6 +2,7 @@ export const ROLES = {
   ADMIN: "admin",
   SALES: "sales",
   MANAGER: "manager",
+  FINANCE: "finance",
   CUSTOMER: "customer",
 };
 
@@ -18,7 +19,7 @@ export const QUOTATION_STAGES = {
 export const CUSTOMER_TIERS = {
   BRONZE: { label: "Bronze", ceiling: 5, color: "amber" },
   SILVER: { label: "Silver", ceiling: 10, color: "slate" },
-  GOLD: { label: "Gold", ceiling: 15, color: "royal" },
+  GOLD: { label: "Gold", ceiling: 15, color: "blue" },
 };
 
 export const APPROVAL_LEVELS = {
