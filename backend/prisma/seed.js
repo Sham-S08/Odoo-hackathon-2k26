@@ -35,6 +35,18 @@ async function main() {
     }
   });
 
+  await prisma.user.upsert({
+    where: { email: "finance.manager@dealflow360.local" },
+    update: {},
+    create: {
+      companyId: company.id,
+      name: "Finance Manager",
+      email: "finance.manager@dealflow360.local",
+      passwordHash,
+      role: "FINANCE_MANAGER"
+    }
+  });
+
   const sales = await prisma.user.upsert({
     where: { email: "sales@dealflow360.local" },
     update: {},
@@ -162,6 +174,7 @@ async function main() {
   console.log("Seed complete.");
   console.log("admin@dealflow360.local / Admin@123");
   console.log("manager@dealflow360.local / Admin@123");
+  console.log("finance.manager@dealflow360.local / Admin@123");
   console.log("sales@dealflow360.local / Admin@123");
   console.log("customer@abc.local / Admin@123");
 }

@@ -1,5 +1,5 @@
 import prisma from "../../config/prisma.js";
-import { evaluateQuotation } from "../ruleEngine/index.js";
+import { approvalRoleForRisk, evaluateQuotation } from "../ruleEngine/index.js";
 import { audit } from "../../utils/audit.js";
 
 function calculateItem(product, item) {
@@ -65,6 +65,7 @@ export async function createQuotation({ companyId, userId, customerId, items, no
       product: byId.get(i.productId)
     }))
   });
+  const approverRole = approvalRoleForRisk({ violations: ruleResult.violations });
 
   const quotation = await prisma.$transaction(async tx => {
     const q = await tx.quotation.create({
@@ -110,7 +111,8 @@ export async function createQuotation({ companyId, userId, customerId, items, no
         },
         approvals: {
           create: {
-            status: "PENDING"
+            status: "PENDING",
+            approverRole
           }
         }
       },
@@ -132,7 +134,7 @@ export async function createQuotation({ companyId, userId, customerId, items, no
       entityType: "QUOTATION",
       entityId: q.id,
       action: "RULE_EVALUATED",
-      metadata: ruleResult
+      metadata: { ...ruleResult, approverRole }
     }, tx);
 
     return q;

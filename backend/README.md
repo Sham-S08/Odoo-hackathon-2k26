@@ -2,6 +2,26 @@
 
 Node.js + Express + Prisma + MySQL backend implementing the uploaded DealFlow360 system specification.
 
+## Server and routes
+
+`server.js` loads environment variables and starts the app exported from
+`src/app.js`. The app applies Helmet, CORS, JSON parsing, request IDs, logging,
+not-found handling, and error handling before mounting every router under
+`/api/v1`.
+
+```text
+server.js -> src/app.js
+  /api/v1/auth             /api/v1/company          /api/v1/users
+  /api/v1/products         /api/v1/customers        /api/v1/discount-rules
+  /api/v1/warehouses       /api/v1/inventory        /api/v1/quotations
+  /api/v1/approvals        /api/v1/negotiations     /api/v1/orders
+  /api/v1/invoices         /api/v1/ai
+```
+
+`GET /health` is public. All business routes above are available from both
+`npm run dev` and `npm start`. The detailed endpoint and access list is in
+[docs/API.md](docs/API.md).
+
 ## Architecture
 
 ```text
@@ -83,6 +103,7 @@ All demo users use password `Admin@123`:
 
 - `admin@dealflow360.local`
 - `manager@dealflow360.local`
+- `finance.manager@dealflow360.local`
 - `sales@dealflow360.local`
 - `customer@abc.local`
 
@@ -90,8 +111,13 @@ All demo users use password `Admin@123`:
 
 - Product prices always come from MySQL, never from the LLM.
 - Rule Engine is deterministic and reads DiscountRule records.
-- Every quotation is created as `PENDING_APPROVAL`.
-- Manager approval remains mandatory even when the rule engine passes.
+- Every quotation is created as `PENDING_APPROVAL` with a pending approval record.
+- Standard quotations are handled by `MANAGER`; `HIGH`/`CRITICAL` risk quotes,
+  scores of 70 or higher, and high-severity rule violations are routed to
+  `FINANCE_MANAGER`.
+- Only the role assigned to the pending approval can approve or reject it.
+- A saved deal-health assessment reroutes a still-pending quotation when its
+  risk changes.
 - Customer negotiation creates a new QuotationVersion.
 - Negotiation recalculates totals, evaluates rules, and calls Deal Health AI again.
 - Customer access is restricted by `customerId`.
@@ -120,13 +146,13 @@ For a hackathon, you can run a small Python/FastAPI mock first and replace it wi
 1. Login as SALES.
 2. Create quotation with `POST /api/v1/quotations`.
 3. Generate deal health.
-4. Login as MANAGER.
-5. Read `GET /api/v1/approvals`.
+4. Login as the assigned `MANAGER` or `FINANCE_MANAGER`.
+5. Read `GET /api/v1/approvals`; it returns only that role's assigned queue.
 6. Approve quotation.
 7. Login as CUSTOMER.
 8. View customer quotations.
 9. Negotiate.
-10. Manager approves the new version.
+10. The assigned manager approves the new version.
 11. Customer accepts.
 12. Create sales order.
 13. Allocate inventory.

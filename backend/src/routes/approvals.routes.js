@@ -5,10 +5,14 @@ import { requireRole } from "../middleware/role.middleware.js";
 
 const router = Router();
 
-router.get("/", requireAuth, requireRole("MANAGER"), async (req, res, next) => {
+router.get("/", requireAuth, requireRole("MANAGER", "FINANCE_MANAGER"), async (req, res, next) => {
   try {
     const data = await prisma.quotation.findMany({
-      where: { companyId: req.user.companyId, status: "PENDING_APPROVAL" },
+      where: {
+        companyId: req.user.companyId,
+        status: "PENDING_APPROVAL",
+        approvals: { some: { status: "PENDING", approverRole: req.user.role } }
+      },
       include: { customer: true, items: { include: { product: true } }, dealHealth: { orderBy: { createdAt: "desc" }, take: 1 } },
       orderBy: { updatedAt: "desc" }
     });
@@ -16,10 +20,14 @@ router.get("/", requireAuth, requireRole("MANAGER"), async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
-router.get("/:id", requireAuth, requireRole("MANAGER"), async (req, res, next) => {
+router.get("/:id", requireAuth, requireRole("MANAGER", "FINANCE_MANAGER"), async (req, res, next) => {
   try {
     const data = await prisma.quotation.findFirst({
-      where: { id: req.params.id, companyId: req.user.companyId },
+      where: {
+        id: req.params.id,
+        companyId: req.user.companyId,
+        approvals: { some: { status: "PENDING", approverRole: req.user.role } }
+      },
       include: { customer: true, items: { include: { product: true } }, versions: true, approvals: true, dealHealth: true }
     });
     if (!data) return res.status(404).json({ success: false, error: { code: "QUOTATION_NOT_FOUND", message: "Quotation not found", details: {} }, requestId: req.requestId });

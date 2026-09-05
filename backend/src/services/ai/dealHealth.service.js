@@ -1,6 +1,7 @@
 import prisma from "../../config/prisma.js";
 import { dealHealth } from "./aiGateway.service.js";
 import { audit } from "../../utils/audit.js";
+import { approvalRoleForRisk } from "../ruleEngine/index.js";
 
 export async function generateDealHealth({ quotationId, companyId, userId }) {
   const quotation = await prisma.quotation.findFirst({
@@ -65,13 +66,25 @@ export async function generateDealHealth({ quotationId, companyId, userId }) {
       }
     });
 
+    const approverRole = approvalRoleForRisk({
+      riskScore: result.riskScore,
+      riskLevel: result.riskLevel,
+      violations: quotation.ruleViolations || []
+    });
+
+    // Only a still-pending quotation can be rerouted after a new risk assessment.
+    const routedApprovals = await tx.approval.updateMany({
+      where: { quotationId, status: "PENDING", quotation: { status: "PENDING_APPROVAL" } },
+      data: { approverRole }
+    });
+
     await audit({
       companyId,
       userId,
       entityType: "QUOTATION",
       entityId: quotationId,
       action: "DEAL_HEALTH_GENERATED",
-      metadata: result
+      metadata: { ...result, approverRole, routedApprovalCount: routedApprovals.count }
     }, tx);
 
     return health;

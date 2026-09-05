@@ -1,6 +1,14 @@
-# DealFlow360 API Quick Reference
+# DealFlow360 API Reference
 
-Base: `/api/v1`
+Base URL: `http://localhost:5000/api/v1`
+
+All responses use `{ success, data | error, message?, requestId }`. Except for
+health and the public authentication endpoints, send
+`Authorization: Bearer <token>`.
+
+## Health
+
+- GET `/health` — public API health check.
 
 ## Auth
 
@@ -10,17 +18,19 @@ Base: `/api/v1`
 - POST `/auth/logout`
 - GET `/auth/me`
 
-## Admin
+## Company, master data, and inventory
+
+All routes in this section require authentication. `PUT /company` and every
+create, update, or delete operation listed below require `ADMIN`; read operations
+are available to all authenticated users.
 
 - GET/PUT `/company`
-- CRUD `/users`
-- CRUD `/products`
-- CRUD `/customers`
-- CRUD `/discount-rules`
-- CRUD `/warehouses`
-- GET `/inventory`
-- GET `/inventory/:productId`
-- PUT `/inventory/:id`
+- GET/POST `/users`, GET/PUT/DELETE `/users/:id`
+- GET/POST `/products`, GET/PUT/DELETE `/products/:id`
+- GET/POST `/customers`, GET/PUT/DELETE `/customers/:id`
+- GET/POST `/discount-rules`, GET/PUT/DELETE `/discount-rules/:id`
+- GET/POST `/warehouses`, GET/PUT/DELETE `/warehouses/:id`
+- GET `/inventory`, GET `/inventory/:productId`, PUT `/inventory/:id`
 
 ## Quotations
 
@@ -37,6 +47,12 @@ Base: `/api/v1`
 
 - GET `/approvals`
 - GET `/approvals/:id`
+
+`HIGH` and `CRITICAL` risk quotations (risk score 70 or higher) are assigned to
+`FINANCE_MANAGER`. Other quotations are assigned to `MANAGER`. Only the assigned
+role can approve or reject a pending quotation. A high-severity discount rule
+violation is also initially routed to the finance manager. A new deal-health
+assessment reroutes only still-pending approvals.
 
 ## Negotiation
 
@@ -61,6 +77,20 @@ Base: `/api/v1`
 
 - POST `/ai/quotation-assistant`
 - POST `/ai/deal-health`
+
+`POST /quotations/:id/deal-health` saves the assessment and drives approval
+routing. `POST /ai/deal-health` only proxies the AI gateway response.
+
+## Route access summary
+
+| Area | Roles |
+| --- | --- |
+| Create and submit quotations; quotation assistant | `SALES` |
+| Approve/reject standard quotation | Assigned `MANAGER` |
+| Approve/reject high-risk quotation | Assigned `FINANCE_MANAGER` |
+| Submit negotiation | `CUSTOMER` |
+| Create orders, allocate inventory, create invoices | `SALES`, `MANAGER` |
+| Manage company master data and inventory | `ADMIN` |
 
 ## Quotation request
 
