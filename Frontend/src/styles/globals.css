@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-royal-50 text-royal-900 font-sans antialiased;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-royal-200 rounded-full;
+}
+
+.brand-gradient {
+  background-image: linear-gradient(135deg, theme("colors.royal.600"), theme("colors.plum.500"));
+}
+
+.brand-gradient-text {
+  background-image: linear-gradient(135deg, theme("colors.royal.600"), theme("colors.plum.500"));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
