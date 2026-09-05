@@ -1,10 +1,24 @@
+
 import { Router } from "express";
+
 import { requireAuth } from "../middleware/auth.middleware.js";
-import { requireRole } from "../middleware/role.middleware.js";
-import { list, byProduct, update } from "../controllers/inventory.controller.js";
+
+import {
+  list,
+  byProduct,
+  update,
+} from "../controllers/inventory.controller.js";
 
 const router = Router();
+
+// Get all inventory for logged-in company
 router.get("/", requireAuth, list);
-router.get("/:productId", requireAuth, byProduct);
-router.put("/:id", requireAuth, requireRole("ADMIN"), update);
+
+// Get inventory for a specific product
+router.get("/product/:productId", requireAuth, byProduct);
+
+// Update inventory quantity
+router.put("/:id", requireAuth, update);
+
 export default router;
+
