@@ -11,6 +11,7 @@ enum Role {
   ADMIN
   SALES
   MANAGER
+  FINANCE_MANAGER
   CUSTOMER
 }
 
@@ -218,6 +219,7 @@ model Approval {
   id          String         @id @default(cuid())
   quotationId String
   managerId   String?
+  approverRole Role          @default(MANAGER)
   status      ApprovalStatus @default(PENDING)
   reason      String?
   createdAt   DateTime       @default(now())

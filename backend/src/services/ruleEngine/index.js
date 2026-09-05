@@ -69,6 +69,13 @@ export function evaluateRiskBand(score) {
   return "CRITICAL";
 }
 
+export function approvalRoleForRisk({ riskScore, riskLevel, violations = [] } = {}) {
+  const hasHighRisk = Number(riskScore) >= 70 || ["HIGH", "CRITICAL"].includes(riskLevel);
+  const hasHighSeverityViolation = violations.some(violation => violation.severity === "HIGH");
+
+  return hasHighRisk || hasHighSeverityViolation ? "FINANCE_MANAGER" : "MANAGER";
+}
+
 export function calculateRuleViolations() {
   throw new Error("Use evaluateQuotation/evaluateDiscount for quotation rules.");
 }

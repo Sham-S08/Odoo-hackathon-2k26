@@ -3,6 +3,25 @@ import { createQuotation } from "../services/quotation/quotation.service.js";
 import { generateDealHealth } from "../services/ai/dealHealth.service.js";
 import { audit } from "../utils/audit.js";
 
+async function getAssignedPendingApproval(quotationId, role) {
+  return prisma.approval.findFirst({
+    where: { quotationId, status: "PENDING", approverRole: role },
+    orderBy: { createdAt: "desc" }
+  });
+}
+
+function approvalPermissionError(req, res) {
+  return res.status(403).json({
+    success: false,
+    error: {
+      code: "APPROVAL_NOT_ASSIGNED",
+      message: "This quotation is assigned to a different approval role",
+      details: { assignedRoles: ["MANAGER", "FINANCE_MANAGER"] }
+    },
+    requestId: req.requestId
+  });
+}
+
 export async function create(req, res, next) {
   try {
     const result = await createQuotation({
@@ -72,10 +91,12 @@ export async function approve(req, res, next) {
     const q = await prisma.quotation.findFirst({ where: { id: req.params.id, companyId: req.user.companyId } });
     if (!q) return res.status(404).json({ success: false, error: { code: "QUOTATION_NOT_FOUND", message: "Quotation not found", details: {} }, requestId: req.requestId });
     if (q.status !== "PENDING_APPROVAL") return res.status(409).json({ success: false, error: { code: "QUOTATION_INVALID_STATUS", message: "Only pending quotations can be approved", details: { status: q.status } }, requestId: req.requestId });
+    const pendingApproval = await getAssignedPendingApproval(q.id, req.user.role);
+    if (!pendingApproval) return approvalPermissionError(req, res);
 
     const updated = await prisma.$transaction(async tx => {
       const result = await tx.quotation.update({ where: { id: q.id }, data: { status: "APPROVED" } });
-      await tx.approval.create({ data: { quotationId: q.id, managerId: req.user.id, status: "APPROVED", reason: req.body.reason || null } });
+      await tx.approval.update({ where: { id: pendingApproval.id }, data: { managerId: req.user.id, status: "APPROVED", reason: req.body.reason || null } });
       await audit({ companyId: req.user.companyId, userId: req.user.id, entityType: "QUOTATION", entityId: q.id, action: "QUOTATION_APPROVED", metadata: { reason: req.body.reason || null } }, tx);
       return result;
     });
@@ -89,10 +110,12 @@ export async function reject(req, res, next) {
     const q = await prisma.quotation.findFirst({ where: { id: req.params.id, companyId: req.user.companyId } });
     if (!q) return res.status(404).json({ success: false, error: { code: "QUOTATION_NOT_FOUND", message: "Quotation not found", details: {} }, requestId: req.requestId });
     if (q.status !== "PENDING_APPROVAL") return res.status(409).json({ success: false, error: { code: "QUOTATION_INVALID_STATUS", message: "Only pending quotations can be rejected", details: { status: q.status } }, requestId: req.requestId });
+    const pendingApproval = await getAssignedPendingApproval(q.id, req.user.role);
+    if (!pendingApproval) return approvalPermissionError(req, res);
 
     const updated = await prisma.$transaction(async tx => {
       const result = await tx.quotation.update({ where: { id: q.id }, data: { status: "REJECTED" } });
-      await tx.approval.create({ data: { quotationId: q.id, managerId: req.user.id, status: "REJECTED", reason: req.body.reason || null } });
+      await tx.approval.update({ where: { id: pendingApproval.id }, data: { managerId: req.user.id, status: "REJECTED", reason: req.body.reason || null } });
       await audit({ companyId: req.user.companyId, userId: req.user.id, entityType: "QUOTATION", entityId: q.id, action: "QUOTATION_REJECTED", metadata: { reason: req.body.reason || null } }, tx);
       return result;
     });

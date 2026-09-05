@@ -8,7 +8,7 @@ export default function DashboardLayout({ role, children }) {
   const { notify } = useNotification();
 
   return (
-    <div className="flex h-screen bg-royal-50">
+    <div className="flex h-screen bg-blue-50/60">
       <Sidebar role={role} />
       <div className="flex flex-1 flex-col overflow-hidden">
         <Navbar

@@ -1,5 +1,5 @@
 import prisma from "../config/prisma.js";
-import { evaluateQuotation } from "../services/ruleEngine/index.js";
+import { approvalRoleForRisk, evaluateQuotation } from "../services/ruleEngine/index.js";
 import { generateDealHealth } from "../services/ai/dealHealth.service.js";
 import { audit } from "../utils/audit.js";
 
@@ -50,6 +50,7 @@ export async function negotiate(req, res, next) {
       customerTier: q.customer.tier,
       items
     });
+    const approverRole = approvalRoleForRisk({ violations: ruleResult.violations });
 
     const version = await prisma.$transaction(async tx => {
       const v = await tx.quotationVersion.create({
@@ -91,7 +92,7 @@ export async function negotiate(req, res, next) {
             }))
           },
           approvals: {
-            create: { status: "PENDING" }
+            create: { status: "PENDING", approverRole }
           }
         }
       });
