@@ -16,6 +16,7 @@ import {
   Truck,
 } from "lucide-react";
 import { ROLES } from "../../utils/constants";
+import { AlertTriangle, Clock, TrendingUp} from "lucide-react";
 
 const NAV_BY_ROLE = {
   [ROLES.ADMIN]: [
@@ -39,7 +40,11 @@ const NAV_BY_ROLE = {
   ],
   [ROLES.MANAGER]: [
     { to: "/manager", label: "Dashboard", icon: LayoutDashboard, end: true },
-    { to: "/manager/approvals", label: "Approvals", icon: ShieldCheck },
+    { to: "/manager/approvals", label: "Approval Queue", icon: ShieldCheck },
+    { to: "/manager/deal-health", label: "Deal Health", icon: AlertTriangle },
+    { to: "/manager/stalled-deals", label: "Stalled Deals", icon: Clock },
+    { to: "/manager/discount-anomalies", label: "Discount Anomalies", icon: TrendingUp },
+    { to: "/manager/reports", label: "Reports", icon: BarChart3 },
   ],
   [ROLES.FINANCE]: [
     { to: "/finance", label: "Dashboard", icon: LayoutDashboard, end: true },
