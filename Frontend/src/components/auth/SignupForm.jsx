@@ -101,7 +101,13 @@ export default function SignupForm() {
         value={form.role}
         onChange={(e) => setForm({ ...form, role: e.target.value })}
       />
-      <Button type="submit" variant="gradient" icon={UserPlus} loading={loading} className="w-full">
+      <Button 
+        type="submit" 
+        variant="primary" 
+        icon={UserPlus} 
+        loading={loading} 
+        className="w-full"
+      >
         Create account
       </Button>
     </form>
