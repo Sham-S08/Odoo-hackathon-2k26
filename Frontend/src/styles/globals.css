@@ -9,7 +9,7 @@ body,
 }
 
 body {
-  @apply bg-royal-50 text-royal-900 font-sans antialiased;
+  @apply bg-blue-50/60 text-slate-800 font-sans antialiased;
 }
 
 ::-webkit-scrollbar {
@@ -17,16 +17,30 @@ body {
   height: 8px;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-royal-200 rounded-full;
+  @apply bg-blue-200 rounded-full;
+}
+::-webkit-scrollbar-track {
+  @apply bg-blue-50/40;
 }
 
-.brand-gradient {
-  background-image: linear-gradient(135deg, theme("colors.royal.600"), theme("colors.plum.500"));
+/* Primary blue gradient - used for buttons, cards, accents */
+.blue-gradient {
+  background-image: linear-gradient(135deg, #2563EB, #3B82F6);
 }
 
-.brand-gradient-text {
-  background-image: linear-gradient(135deg, theme("colors.royal.600"), theme("colors.plum.500"));
+.blue-gradient-text {
+  background-image: linear-gradient(135deg, #2563EB, #3B82F6);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+/* Subtle shadow for cards/panels */
+.shadow-panel {
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.06), 0 4px 12px rgba(37, 99, 235, 0.05);
+}
+
+/* Focus ring for accessibility */
+*:focus-visible {
+  @apply outline-none ring-2 ring-blue-400 ring-offset-2 ring-offset-white;
 }

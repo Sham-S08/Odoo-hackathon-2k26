@@ -2,13 +2,11 @@ import { Loader2 } from "lucide-react";
 
 const VARIANTS = {
   primary:
-    "bg-royal-600 text-white hover:bg-royal-700 focus-visible:ring-royal-400",
-  gradient:
-    "brand-gradient text-white hover:opacity-90 focus-visible:ring-plum-300",
+    "bg-blue-600 text-white hover:bg-blue-700 focus-visible:ring-blue-400",
   secondary:
-    "bg-white text-royal-700 border border-royal-200 hover:bg-royal-50 focus-visible:ring-royal-300",
+    "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 focus-visible:ring-blue-300",
   ghost:
-    "bg-transparent text-royal-700 hover:bg-royal-100 focus-visible:ring-royal-300",
+    "bg-transparent text-slate-700 hover:bg-slate-100 focus-visible:ring-blue-300",
   danger:
     "bg-rose-600 text-white hover:bg-rose-700 focus-visible:ring-rose-300",
 };

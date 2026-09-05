@@ -60,7 +60,13 @@ export default function LoginForm() {
         error={errors.password}
         onChange={(e) => setForm({ ...form, password: e.target.value })}
       />
-      <Button type="submit" variant="gradient" icon={LogIn} loading={loading} className="w-full">
+      <Button 
+        type="submit" 
+        variant="primary" 
+        icon={LogIn} 
+        loading={loading} 
+        className="w-full"
+      >
         Log in
       </Button>
     </form>
