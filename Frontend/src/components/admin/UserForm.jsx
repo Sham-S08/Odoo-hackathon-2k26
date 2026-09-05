@@ -2,20 +2,27 @@ import { useState } from "react";
 import Input from "../common/Input";
 import Select from "../common/Select";
 import Button from "../common/Button";
+import { ROLES } from "../../utils/constants";
+
+const ROLE_OPTIONS = [
+  { value: ROLES.SALES, label: "Sales Representative" },
+  { value: ROLES.MANAGER, label: "Sales Manager" },
+  { value: ROLES.FINANCE, label: "Finance Manager" },
+  { value: ROLES.ADMIN, label: "Admin" },
+];
 
 const STATUS_OPTIONS = [
   { value: "Active", label: "Active" },
   { value: "Inactive", label: "Inactive" },
 ];
 
-export default function WarehouseForm({ initialValue, onSubmit, onCancel, submitting }) {
+export default function UserForm({ initialValue, onSubmit, onCancel, submitting }) {
   const [form, setForm] = useState(
     initialValue || { 
       name: "", 
-      location: "", 
-      stockLevel: "", 
-      shippingWeight: 1,
-      status: "Active"
+      email: "", 
+      role: ROLES.SALES, 
+      status: "Active" 
     }
   );
 
@@ -28,33 +35,25 @@ export default function WarehouseForm({ initialValue, onSubmit, onCancel, submit
       className="space-y-4"
     >
       <Input
-        label="Warehouse Name"
+        label="Full Name"
         value={form.name}
         onChange={(e) => setForm({ ...form, name: e.target.value })}
         required
       />
       
       <Input
-        label="Location"
-        value={form.location}
-        onChange={(e) => setForm({ ...form, location: e.target.value })}
+        label="Email"
+        type="email"
+        value={form.email}
+        onChange={(e) => setForm({ ...form, email: e.target.value })}
         required
       />
       
-      <Input
-        label="Stock Level / Notes"
-        value={form.stockLevel}
-        onChange={(e) => setForm({ ...form, stockLevel: e.target.value })}
-        placeholder="e.g. Healthy, Low on hardware"
-      />
-      
-      <Input
-        label="Shipping Cost Weighting"
-        type="number"
-        min={0}
-        step={0.1}
-        value={form.shippingWeight}
-        onChange={(e) => setForm({ ...form, shippingWeight: Number(e.target.value) })}
+      <Select
+        label="Role"
+        options={ROLE_OPTIONS}
+        value={form.role}
+        onChange={(e) => setForm({ ...form, role: e.target.value })}
       />
       
       <Select
@@ -69,7 +68,7 @@ export default function WarehouseForm({ initialValue, onSubmit, onCancel, submit
           Cancel
         </Button>
         <Button variant="primary" type="submit" loading={submitting}>
-          {initialValue ? "Update Warehouse" : "Create Warehouse"}
+          {initialValue ? "Update User" : "Create User"}
         </Button>
       </div>
     </form>

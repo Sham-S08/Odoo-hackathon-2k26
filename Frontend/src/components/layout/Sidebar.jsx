@@ -9,6 +9,9 @@ import {
   ShieldCheck,
   Users,
   Warehouse,
+  Sparkles,
+  BarChart3,
+  Settings,  // ← ADD THIS
   CreditCard,
   Truck,
 } from "lucide-react";
@@ -24,6 +27,9 @@ const NAV_BY_ROLE = {
     { to: "/admin/warehouses", label: "Warehouses", icon: Warehouse },
     { to: "/admin/inventory", label: "Inventory", icon: Boxes },
     { to: "/admin/subscription-plans", label: "Subscription Plans", icon: FileText },
+    { to: "/admin/upsell-rules", label: "Upsell Rules", icon: Sparkles },
+    { to: "/admin/reports", label: "Reports", icon: BarChart3 },
+    { to: "/admin/settings", label: "Settings", icon: Settings },
   ],
   [ROLES.SALES]: [
     { to: "/sales", label: "Dashboard", icon: LayoutDashboard, end: true },
