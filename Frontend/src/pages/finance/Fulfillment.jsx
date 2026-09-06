@@ -1,23 +1,82 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Search, Truck, Package, Clock, CheckCircle2 } from "lucide-react";
 import PageHeader from "../../components/layout/PageHeader";
-import Table from "../../components/common/Table";
-import Button from "../../components/common/Button";
+import Input from "../../components/common/Input";
+import Card from "../../components/common/Card";
 import Badge from "../../components/common/Badge";
-import { useOrders } from "../../hooks/useOrders";
-import { ordersApi } from "../../api/orders.api";
-import { useNotification } from "../../context/NotificationContext";
+import { formatCurrency } from "../../utils/formatCurrency";
+import { MOCK_FULFILLMENT } from "../../utils/financeMockData";
+
+const STATUS_TONES = {
+  "Pending Allocation": "amber",
+  "Partially Fulfilled": "blue",
+  "Fulfilled": "green"
+};
+
+const STATUS_ICONS = {
+  "Pending Allocation": Clock,
+  "Partially Fulfilled": Package,
+  "Fulfilled": CheckCircle2
+};
 
 export default function Fulfillment() {
-  const { orders, loading, error, refresh } = useOrders();
-  const { notify } = useNotification();
-  const [processing, setProcessing] = useState(null);
-  async function allocate(order) { setProcessing(order.id); try { await ordersApi.allocate(order.id); await refresh(); notify("Order inventory allocated", "success"); } catch (requestError) { notify(requestError.message || "Could not allocate order", "error"); } finally { setProcessing(null); } }
-  const columns = [{ key: "id", header: "Order" }, { key: "status", header: "Status", render: (row) => <Badge tone={row.status === "ALLOCATED" ? "green" : "amber"}>{row.status}</Badge> }, { key: "total", header: "Total", render: (row) => `$${Number(row.total || 0).toFixed(2)}` }, { key: "items", header: "Items", render: (row) => row.items?.length || 0 }, { key: "action", header: "Action", render: (row) => row.status === "CREATED" ? <Button variant="primary" loading={processing === row.id} onClick={() => allocate(row)}>Allocate</Button> : <span className="text-sm text-slate-500">Allocated</span> }];
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filtered = MOCK_FULFILLMENT.filter((f) =>
+    f.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    f.id.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div>
-      <PageHeader title="Fulfillment" description="Warehouse allocation and order fulfillment" />
-      {error ? <p className="mb-4 rounded-lg bg-rose-50 p-4 text-sm text-rose-700">{error}</p> : null}
-      <Table columns={columns} data={orders} loading={loading} emptyMessage="No orders ready for fulfillment" />
+      <PageHeader 
+        title="Fulfillment" 
+        description="Warehouse allocation and order fulfillment"
+        actions={
+          <button className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors">
+            + New Allocation
+          </button>
+        }
+      />
+
+      <div className="mb-4 max-w-sm">
+        <Input placeholder="Search by order ID or customer..." icon={Search} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+      </div>
+
+      <div className="grid grid-cols-1 gap-4">
+        {filtered.map((order) => {
+          const Icon = STATUS_ICONS[order.status] || Package;
+          return (
+            <button
+              key={order.id}
+              onClick={() => navigate(`/finance/fulfillment/${order.id}`)}
+              className="flex w-full items-center justify-between rounded-xl border border-blue-100 bg-white p-4 text-left hover:shadow-md transition-shadow"
+            >
+              <div className="flex items-center gap-4">
+                <div className={`rounded-lg p-2 ${
+                  order.status === "Pending Allocation" ? "bg-amber-100 text-amber-600" :
+                  order.status === "Partially Fulfilled" ? "bg-blue-100 text-blue-600" :
+                  "bg-emerald-100 text-emerald-600"
+                }`}>
+                  <Icon className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="font-medium text-slate-800">{order.id}</p>
+                  <p className="text-sm text-slate-500">{order.customerName}</p>
+                  <p className="text-xs text-slate-400">{order.items.length} items</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="font-medium text-slate-800">{formatCurrency(order.total)}</p>
+                <Badge tone={STATUS_TONES[order.status] || "slate"}>{order.status}</Badge>
+                <p className="mt-1 text-xs text-slate-400">{new Date(order.createdAt).toLocaleDateString()}</p>
+              </div>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
