@@ -129,6 +129,27 @@ async function main() {
     }
   });
 
+  await prisma.subscriptionPlan.deleteMany({
+    where: {
+      companyId: company.id,
+      id: { in: ["demo-plan-support", "demo-plan-analytics", "demo-plan-premium"] }
+    }
+  });
+
+  const subscriptionPlans = [
+    { id: "plan_1", name: "24/7 Premium Support", cadence: "Monthly", price: 99, prorationRule: "Daily proration", cancellationRule: "Full refund within 30 days", active: true },
+    { id: "plan_2", name: "Analytics & Reporting Add-on", cadence: "Yearly", price: 590, prorationRule: "Daily proration", cancellationRule: "Partial refund for unused months", active: true },
+    { id: "plan_3", name: "Enterprise Security Bundle", cadence: "Quarterly", price: 250, prorationRule: "No proration", cancellationRule: "Non-refundable after 7 days", active: false }
+  ];
+
+  for (const plan of subscriptionPlans) {
+    await prisma.subscriptionPlan.upsert({
+      where: { id: plan.id },
+      update: plan,
+      create: { ...plan, companyId: company.id }
+    });
+  }
+
   await prisma.discountRule.upsert({
     where: { id: "demo-gold-service-rule" },
     update: {},
@@ -170,6 +191,59 @@ async function main() {
     update: { quantity: 100 },
     create: { companyId: company.id, warehouseId: ahmedabad.id, productId: installation.id, quantity: 100 }
   });
+
+  const demoQuotation = await prisma.quotation.upsert({
+    where: { id: "demo-quotation" },
+    update: {},
+    create: {
+      id: "demo-quotation",
+      companyId: company.id,
+      customerId: customer.id,
+      createdById: sales.id,
+      status: "APPROVED",
+      versionNumber: 1,
+      notes: "Demo quotation for the customer portal",
+      subtotal: 95000,
+      discountTotal: 5000,
+      taxTotal: 15120,
+      total: 105120,
+      rulePassed: true,
+      ruleViolations: [],
+      items: {
+        create: [
+          { productId: laptop.id, quantity: 1, unitPrice: 70000, discountPercent: 5, discountAmount: 3500, taxRate: 18, taxAmount: 11970, lineTotal: 78470 },
+          { productId: installation.id, quantity: 5, unitPrice: 5000, discountPercent: 6, discountAmount: 1500, taxRate: 18, taxAmount: 3150, lineTotal: 19150 }
+        ]
+      },
+      versions: {
+        create: {
+          versionNumber: 1,
+          status: "APPROVED",
+          subtotal: 95000,
+          discountTotal: 5000,
+          taxTotal: 15120,
+          total: 105120,
+          notes: "Initial approved quotation",
+          snapshot: { source: "seed", items: ["demo-laptop", "demo-installation"] }
+        }
+      },
+      approvals: { create: { status: "APPROVED", approverRole: "MANAGER", managerId: manager.id } }
+    }
+  });
+
+  const existingHealth = await prisma.dealHealth.findFirst({ where: { quotationId: demoQuotation.id } });
+  if (!existingHealth) {
+    await prisma.dealHealth.create({
+      data: {
+        quotationId: demoQuotation.id,
+        riskScore: 18,
+        riskLevel: "LOW",
+        reasons: ["Discounts are within configured customer and category limits"],
+        recommendations: ["Proceed with customer confirmation"],
+        rawResponse: { source: "seed" }
+      }
+    });
+  }
 
   console.log("Seed complete.");
   console.log("admin@dealflow360.local / Admin@123");
