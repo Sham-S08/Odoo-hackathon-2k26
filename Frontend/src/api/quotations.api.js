@@ -5,6 +5,7 @@ export const quotationsApi = {
   get: (id) => api.get(`/quotations/${id}`),
   create: (payload) => api.post("/quotations", payload),
   submit: (id) => api.post(`/quotations/${id}/submit`),
+  confirm: (id) => api.post(`/quotations/${id}/confirm`),
   approve: (id, payload) => api.post(`/quotations/${id}/approve`, payload),
   reject: (id, payload) => api.post(`/quotations/${id}/reject`, payload),
   computeDealHealth: (id) => api.post(`/quotations/${id}/deal-health`),

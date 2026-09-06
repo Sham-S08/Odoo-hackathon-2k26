@@ -5,11 +5,23 @@ import PageHeader from "../../components/layout/PageHeader";
 import Button from "../../components/common/Button";
 import QuotationTable from "../../components/sales/QuotationTable";
 import QuotationCard from "../../components/sales/QuotationCard";
-import { SAMPLE_QUOTATIONS } from "../../utils/sampleData";
+import { useQuotations } from "../../hooks/useQuotations";
+
+function mapQuotation(quotation) {
+  return {
+    ...quotation,
+    customerName: quotation.customer?.name || "Unknown customer",
+    rep: quotation.createdBy?.name || "-",
+    stage: quotation.status?.replaceAll("_", " ") || "Draft",
+    total: Number(quotation.total || 0),
+  };
+}
 
 export default function Quotations({ pipelineView = false }) {
   const navigate = useNavigate();
   const [view, setView] = useState(pipelineView ? "grid" : "list");
+  const { quotations, loading, error } = useQuotations();
+  const rows = quotations.map(mapQuotation);
 
   return (
     <div>
@@ -39,14 +51,16 @@ export default function Quotations({ pipelineView = false }) {
         }
       />
 
+      {error ? <p className="rounded-lg bg-rose-50 p-4 text-sm text-rose-700">{error}</p> : null}
       {view === "list" ? (
         <QuotationTable
-          quotations={SAMPLE_QUOTATIONS}
+          quotations={rows}
+          loading={loading}
           onOpen={(q) => navigate(`/sales/quotations/${q.id}`)}
         />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {SAMPLE_QUOTATIONS.map((q) => (
+          {rows.map((q) => (
             <QuotationCard key={q.id} quotation={q} onOpen={() => navigate(`/sales/quotations/${q.id}`)} />
           ))}
         </div>

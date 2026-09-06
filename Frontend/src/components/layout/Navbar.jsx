@@ -1,22 +1,22 @@
-import { Bell, LogOut, RefreshCcw, Search, Settings } from "lucide-react";
+import { Bell, LogOut, RefreshCcw, Settings, CreditCard } from "lucide-react";
 import { useAuthContext } from "../../context/AuthContext";
+import { useState } from "react";
+import { ROLES } from "../../utils/constants";
+import SubscriptionModal from "./SubscriptionModal";
 
 export default function Navbar({ onReload, onOpenSettings }) {
   const { user, logout } = useAuthContext();
+  const [plansOpen, setPlansOpen] = useState(false);
 
   return (
     <header className="flex h-16 items-center justify-between border-b border-blue-100 bg-white px-6">
-      <div className="flex items-center gap-3">
-        <div className="relative w-72 max-w-full">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <input
-            placeholder="Search quotations, customers, products"
-            className="w-full rounded-lg border border-blue-100 bg-blue-50/40 py-2 pl-9 pr-3 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-          />
-        </div>
-      </div>
+      <div className="flex items-center gap-3" />
 
       <div className="flex items-center gap-2">
+        <button onClick={() => setPlansOpen(true)} className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-blue-50 transition-colors" title="View subscription plans">
+          <CreditCard className="h-4 w-4" />
+          Subscription Plans
+        </button>
         <button
           onClick={onReload}
           className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-blue-50 transition-colors"
@@ -50,6 +50,7 @@ export default function Navbar({ onReload, onOpenSettings }) {
           <LogOut className="h-4.5 w-4.5" />
         </button>
       </div>
+      <SubscriptionModal open={plansOpen} onClose={() => setPlansOpen(false)} isAdmin={user?.role === ROLES.ADMIN} />
     </header>
   );
 }

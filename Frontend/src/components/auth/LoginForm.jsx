@@ -14,6 +14,7 @@ export default function LoginForm() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   function validate() {
     const next = {};
@@ -30,7 +31,14 @@ export default function LoginForm() {
     try {
       const user = await login(form);
       notify(`Welcome back, ${user?.name || "there"}`, "success");
-      navigate(`/${user?.role || "sales"}`);
+      const destinationByRole = {
+        admin: "/admin",
+        sales: "/sales",
+        manager: "/manager",
+        finance: "/finance",
+        customer: "/portal",
+      };
+      navigate(destinationByRole[user?.role] || "/sales");
     } catch (err) {
       notify(err.message || "Could not log in", "error");
     } finally {
@@ -60,6 +68,21 @@ export default function LoginForm() {
         error={errors.password}
         onChange={(e) => setForm({ ...form, password: e.target.value })}
       />
+
+      {/* Remember Me — UI Only */}
+      <div className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          id="rememberMe"
+          checked={rememberMe}
+          onChange={(e) => setRememberMe(e.target.checked)}
+          className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-400 focus:ring-2 cursor-pointer"
+        />
+        <label htmlFor="rememberMe" className="text-sm text-slate-600 cursor-pointer hover:text-slate-800 transition-colors">
+          Remember me
+        </label>
+      </div>
+
       <Button 
         type="submit" 
         variant="primary" 

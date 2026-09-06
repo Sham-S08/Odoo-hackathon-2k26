@@ -2,10 +2,8 @@ import { useState } from "react";
 import { Check, RotateCcw, X, CheckCircle2, XCircle } from "lucide-react";
 import Button from "../common/Button";
 import Modal from "../common/Modal";
-import { useNotification } from "../../context/NotificationContext";
 
 export default function ApprovalActions({ onDecision, quotationId, currentStatus }) {
-  const { notify } = useNotification();
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [action, setAction] = useState(null);
   const [reason, setReason] = useState("");
@@ -39,26 +37,17 @@ export default function ApprovalActions({ onDecision, quotationId, currentStatus
     setShowConfirmModal(true);
   };
 
-  const confirmAction = () => {
+  const confirmAction = async () => {
     setIsProcessing(true);
-    
-    setTimeout(() => {
-      const actionName = action === "approve" ? "Approved" : 
-                         action === "reject" ? "Rejected" : "Returned for Revision";
-      
-      notify(
-        `Quotation ${quotationId} has been ${actionName.toLowerCase()}`, 
-        action === "approve" ? "success" : 
-        action === "reject" ? "error" : "warning"
-      );
-      
-      onDecision?.(action, action === "reject" ? reason : instructions);
+    try {
+      await onDecision?.(action, action === "reject" ? reason : instructions);
       setShowConfirmModal(false);
       setAction(null);
       setReason("");
       setInstructions("");
+    } finally {
       setIsProcessing(false);
-    }, 800);
+    }
   };
 
   return (

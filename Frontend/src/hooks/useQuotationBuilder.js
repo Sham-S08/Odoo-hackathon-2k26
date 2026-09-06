@@ -21,8 +21,8 @@ export function useQuotationBuilder() {
         notes: draft.notes,
       };
       const res = await quotationsApi.create(payload);
-      const submitted = await quotationsApi.submit(res.data.id);
-      return submitted.data;
+      const health = await quotationsApi.computeDealHealth(res.data.quotation?.id || res.data.id);
+      return { ...res.data, dealHealth: health.data };
     } finally {
       setSubmitting(false);
     }

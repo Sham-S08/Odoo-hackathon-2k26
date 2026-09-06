@@ -6,12 +6,14 @@ import RecentQuotations from "../../components/dashboard/RecentQuotations";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
 import { useNavigate } from "react-router-dom";
-import { SAMPLE_QUOTATIONS, SAMPLE_SALES_TREND } from "../../utils/sampleData";
+import { useQuotations } from "../../hooks/useQuotations";
 import { formatCurrency } from "../../utils/formatCurrency";
 
 export default function SalesDashboard() {
   const navigate = useNavigate();
-  const pipelineValue = SAMPLE_QUOTATIONS.reduce((sum, q) => sum + q.total, 0);
+  const { quotations } = useQuotations();
+  const pipelineQuotations = quotations.filter((q) => !["COMPLETED", "CANCELLED"].includes(q.status));
+  const pipelineValue = pipelineQuotations.reduce((sum, q) => sum + Number(q.total || 0), 0);
 
   return (
     <div>
@@ -27,17 +29,17 @@ export default function SalesDashboard() {
 
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard label="Open pipeline value" value={formatCurrency(pipelineValue)} change={8.4} icon={HandCoins} tone="royal" />
-        <StatCard label="Active quotations" value={SAMPLE_QUOTATIONS.length} change={2} icon={ShoppingBag} tone="plum" />
-        <StatCard label="Win rate (30d)" value="42%" change={-3} icon={TrendingUp} tone="emerald" />
+        <StatCard label="Active quotations" value={pipelineQuotations.length} icon={ShoppingBag} tone="plum" />
+        <StatCard label="Approved quotations" value={quotations.filter((q) => q.status === "APPROVED").length} icon={TrendingUp} tone="emerald" />
       </div>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
         <Card title="Sales this week" className="lg:col-span-2">
-          <SalesChart data={SAMPLE_SALES_TREND} />
+          <p className="text-sm text-royal-500">Live pipeline value: {formatCurrency(pipelineValue)}</p>
         </Card>
         <Card title="Recent quotations" padded={false}>
           <div className="px-5">
-            <RecentQuotations quotations={SAMPLE_QUOTATIONS} onOpen={(q) => navigate(`/sales/quotations/${q.id}`)} />
+            <RecentQuotations quotations={quotations.slice(0, 5).map((quotation) => ({ ...quotation, customerName: quotation.customer?.name, total: Number(quotation.total) }))} onOpen={(q) => navigate(`/sales/quotations/${q.id}`)} />
           </div>
         </Card>
       </div>

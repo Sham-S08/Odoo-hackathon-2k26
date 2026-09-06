@@ -4,7 +4,11 @@ import { formatCurrency } from "../../utils/formatCurrency";
 
 export default function ProductSelector({ products = [], query, onQueryChange, onAdd }) {
   const filtered = products.filter((p) =>
-    p.name.toLowerCase().includes((query || "").toLowerCase())
+    [p.name, p.sku, p.description, p.category, p.type]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase()
+      .includes((query || "").toLowerCase())
   );
 
   return (
@@ -26,10 +30,15 @@ export default function ProductSelector({ products = [], query, onQueryChange, o
           >
             <div>
               <p className="text-sm font-medium text-royal-900">{product.name}</p>
+              <p className="text-xs text-royal-400">SKU: {product.sku}</p>
+              {product.description ? <p className="mt-1 text-xs text-royal-500">{product.description}</p> : null}
               <div className="mt-1 flex items-center gap-2">
                 <Badge tone="slate">{product.category}</Badge>
                 <span className="text-xs text-royal-400">{formatCurrency(product.price)}</span>
               </div>
+              <p className="mt-1 text-[10px] uppercase tracking-wide text-royal-400">
+                {product.type || "Unit"} · {product.active ? "Active" : "Inactive"} · Tax {product.taxRate ?? 0}%
+              </p>
             </div>
             <button
               onClick={() => onAdd(product)}

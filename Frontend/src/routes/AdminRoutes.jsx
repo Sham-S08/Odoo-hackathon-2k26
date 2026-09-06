@@ -11,8 +11,6 @@ import Warehouses from "../pages/admin/Warehouses";
 import Inventory from "../pages/admin/Inventory";
 import SubscriptionPlans from "../pages/admin/SubscriptionPlans";
 import UpsellRules from "../pages/admin/UpsellRules";
-import Reports from "../pages/admin/Reports";
-import Settings from "../pages/admin/Settings";
 
 export default function AdminRoutes() {
   return (
@@ -27,8 +25,6 @@ export default function AdminRoutes() {
         <Route path="inventory" element={<Inventory />} />
         <Route path="subscription-plans" element={<SubscriptionPlans />} />
         <Route path="upsell-rules" element={<UpsellRules />} />
-        <Route path="reports" element={<Reports />} />
-        <Route path="settings" element={<Settings />} />
       </Routes>
     </DashboardLayout>
   );

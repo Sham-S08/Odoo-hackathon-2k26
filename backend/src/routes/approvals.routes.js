@@ -13,7 +13,7 @@ router.get("/", requireAuth, requireRole("MANAGER", "FINANCE_MANAGER"), async (r
         status: "PENDING_APPROVAL",
         approvals: { some: { status: "PENDING", approverRole: req.user.role } }
       },
-      include: { customer: true, items: { include: { product: true } }, dealHealth: { orderBy: { createdAt: "desc" }, take: 1 } },
+      include: { customer: true, createdBy: true, negotiations: { orderBy: { createdAt: "desc" } }, items: { include: { product: true } }, dealHealth: { orderBy: { createdAt: "desc" }, take: 1 } },
       orderBy: { updatedAt: "desc" }
     });
     res.json({ success: true, data, message: "Approval queue fetched", requestId: req.requestId });
@@ -28,7 +28,7 @@ router.get("/:id", requireAuth, requireRole("MANAGER", "FINANCE_MANAGER"), async
         companyId: req.user.companyId,
         approvals: { some: { status: "PENDING", approverRole: req.user.role } }
       },
-      include: { customer: true, items: { include: { product: true } }, versions: true, approvals: true, dealHealth: true }
+      include: { customer: true, createdBy: true, negotiations: { orderBy: { createdAt: "desc" } }, items: { include: { product: true } }, versions: true, approvals: true, dealHealth: true }
     });
     if (!data) return res.status(404).json({ success: false, error: { code: "QUOTATION_NOT_FOUND", message: "Quotation not found", details: {} }, requestId: req.requestId });
     res.json({ success: true, data, message: "Approval details fetched", requestId: req.requestId });

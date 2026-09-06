@@ -68,6 +68,7 @@ model Company {
   users         User[]
   customers     Customer[]
   products      Product[]
+  subscriptionPlans SubscriptionPlan[]
   discountRules DiscountRule[]
   warehouses    Warehouse[]
   quotations    Quotation[]
@@ -135,6 +136,22 @@ model Product {
 
   @@unique([companyId, sku])
   @@index([companyId, category])
+}
+
+model SubscriptionPlan {
+  id               String   @id @default(cuid())
+  companyId        String
+  name             String
+  cadence          String
+  price            Decimal  @db.Decimal(15, 2)
+  prorationRule    String?
+  cancellationRule String?
+  active           Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  company          Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, active])
 }
 
 model DiscountRule {

@@ -26,8 +26,11 @@ export async function register(req, res, next) {
 
     const passwordHash = await bcrypt.hash(password, 12);
     const company = await prisma.company.create({ data: { name: companyName } });
+    const customer = role === "CUSTOMER"
+      ? await prisma.customer.create({ data: { companyId: company.id, name: companyName, email: normalizedEmail } })
+      : null;
     const user = await prisma.user.create({
-      data: { companyId: company.id, name, email: normalizedEmail, passwordHash, role }
+      data: { companyId: company.id, customerId: customer?.id, name, email: normalizedEmail, passwordHash, role }
     });
 
     const token = sign(user);
@@ -35,7 +38,7 @@ export async function register(req, res, next) {
 
     return res.status(201).json({
       success: true,
-      data: { token, user: { id: user.id, name: user.name, email: user.email, role: user.role, companyId: user.companyId } },
+      data: { token, user: { id: user.id, name: user.name, email: user.email, role: user.role, companyId: user.companyId, customerId: user.customerId } },
       message: "Registered successfully",
       requestId: req.requestId
     });
@@ -49,6 +52,15 @@ export async function login(req, res, next) {
 
     if (!user || !user.active || !(await bcrypt.compare(password || "", user.passwordHash))) {
       return res.status(401).json({ success: false, error: { code: "AUTH_INVALID_CREDENTIALS", message: "Invalid email or password", details: {} }, requestId: req.requestId });
+    }
+
+    if (user.role === "CUSTOMER" && !user.customerId) {
+      const customer = await prisma.customer.findFirst({ where: { companyId: user.companyId, email: user.email } })
+        || await prisma.customer.create({ data: { companyId: user.companyId, name: user.name, email: user.email } });
+      if (customer) {
+        await prisma.user.update({ where: { id: user.id }, data: { customerId: customer.id } });
+        user.customerId = customer.id;
+      }
     }
 
     const token = sign(user);

@@ -14,14 +14,15 @@ const ROLE_OPTIONS = [
   { value: ROLES.MANAGER, label: "Sales Manager" },
   { value: ROLES.FINANCE, label: "Finance Manager" },
   { value: ROLES.ADMIN, label: "Admin" },
+  { value: ROLES.CUSTOMER, label: "Customer (Portal Access)" },
 ];
 
-// Role descriptions for the help text
 const ROLE_DESCRIPTIONS = {
   [ROLES.SALES]: "Create quotations, respond to customer negotiations",
   [ROLES.MANAGER]: "Approve/reject quotes, configure discount rules, monitor deal health",
   [ROLES.FINANCE]: "Second-level approvals, warehouse fulfillment, billing",
   [ROLES.ADMIN]: "Configure products, price lists, warehouses, subscription plans",
+  [ROLES.CUSTOMER]: "View own quotations, negotiate, accept terms",
 };
 
 export default function SignupForm() {

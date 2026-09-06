@@ -21,6 +21,20 @@ export function useProducts(params) {
 
   useEffect(() => {
     refresh();
+    const handleProductsChanged = () => refresh();
+    const handleStorageChange = (event) => {
+      if (event.key === "products:changed") refresh();
+    };
+    const channel = typeof BroadcastChannel !== "undefined" ? new BroadcastChannel("dealflow-products") : null;
+    channel?.addEventListener("message", handleProductsChanged);
+    window.addEventListener("products:changed", handleProductsChanged);
+    window.addEventListener("storage", handleStorageChange);
+    return () => {
+      channel?.removeEventListener("message", handleProductsChanged);
+      channel?.close();
+      window.removeEventListener("products:changed", handleProductsChanged);
+      window.removeEventListener("storage", handleStorageChange);
+    };
   }, [refresh]);
 
   return { products, loading, error, refresh };

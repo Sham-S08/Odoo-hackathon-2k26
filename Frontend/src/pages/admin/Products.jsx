@@ -6,15 +6,16 @@ import Modal from "../../components/common/Modal";
 import Input from "../../components/common/Input";
 import ProductTable from "../../components/admin/ProductTable";
 import ProductForm from "../../components/admin/ProductForm";
-import { SAMPLE_PRODUCTS } from "../../utils/sampleData";
+import { MOCK_PRODUCTS } from "../../utils/adminMockData";
 
 export default function Products() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredProducts = SAMPLE_PRODUCTS.filter((product) =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredProducts = MOCK_PRODUCTS.filter((product) =>
+    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    product.sku.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -29,7 +30,6 @@ export default function Products() {
         }
       />
 
-      {/* Search Bar */}
       <div className="mb-4 max-w-sm">
         <Input
           placeholder="Search products..."

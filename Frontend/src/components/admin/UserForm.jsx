@@ -48,6 +48,15 @@ export default function UserForm({ initialValue, onSubmit, onCancel, submitting 
         onChange={(e) => setForm({ ...form, email: e.target.value })}
         required
       />
+
+      {!initialValue && <Input
+        label="Temporary Password"
+        type="password"
+        value={form.password || ""}
+        onChange={(e) => setForm({ ...form, password: e.target.value })}
+        minLength={8}
+        required
+      />}
       
       <Select
         label="Role"

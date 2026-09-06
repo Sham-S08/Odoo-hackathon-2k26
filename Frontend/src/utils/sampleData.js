@@ -117,11 +117,6 @@ export const SAMPLE_DEAL_HEALTH_TREND = [
   { label: "W4", value: 8 },
 ];
 
-export const SAMPLE_STALLED_DEALS = [
-  { id: "quo_5004", customerName: "Globex", total: 41500, idleDays: 12 },
-  { id: "quo_5001", customerName: "Acme Corp", total: 24800, idleDays: 6 },
-];
-
 export const SAMPLE_DISCOUNT_ANOMALIES = [
   { id: "anom_1", repName: "Priya Shah", discountGiven: 18, repAverage: 9, quotationId: "quo_5001" },
 ];

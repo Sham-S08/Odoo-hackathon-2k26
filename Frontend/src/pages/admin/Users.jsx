@@ -6,14 +6,14 @@ import Modal from "../../components/common/Modal";
 import Input from "../../components/common/Input";
 import UserTable from "../../components/admin/UserTable";
 import UserForm from "../../components/admin/UserForm";
-import { SAMPLE_USERS } from "../../utils/sampleData";
+import { MOCK_USERS } from "../../utils/adminMockData";
 
 export default function Users() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredUsers = SAMPLE_USERS.filter((user) =>
+  const filteredUsers = MOCK_USERS.filter((user) =>
     user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -30,7 +30,6 @@ export default function Users() {
         }
       />
 
-      {/* Search Bar */}
       <div className="mb-4 max-w-sm">
         <Input
           placeholder="Search users by name or email..."

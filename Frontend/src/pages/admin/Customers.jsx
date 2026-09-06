@@ -6,14 +6,14 @@ import Modal from "../../components/common/Modal";
 import Input from "../../components/common/Input";
 import CustomerTable from "../../components/admin/CustomerTable";
 import CustomerForm from "../../components/admin/CustomerForm";
-import { SAMPLE_CUSTOMERS } from "../../utils/sampleData";
+import { MOCK_CUSTOMERS } from "../../utils/adminMockData";
 
 export default function Customers() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredCustomers = SAMPLE_CUSTOMERS.filter((customer) =>
+  const filteredCustomers = MOCK_CUSTOMERS.filter((customer) =>
     customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     customer.contactEmail.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -30,7 +30,6 @@ export default function Customers() {
         }
       />
 
-      {/* Search Bar */}
       <div className="mb-4 max-w-sm">
         <Input
           placeholder="Search customers..."

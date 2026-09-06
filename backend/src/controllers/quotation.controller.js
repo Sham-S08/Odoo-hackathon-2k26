@@ -41,10 +41,13 @@ export async function create(req, res, next) {
 export async function list(req, res, next) {
   try {
     const where = { companyId: req.user.companyId };
-    if (req.user.role === "CUSTOMER") where.customerId = req.user.customerId;
+    if (req.user.role === "CUSTOMER" && req.user.customerId) where.customerId = req.user.customerId;
+    if (req.user.role === "CUSTOMER" && !req.user.customerId) {
+      return res.json({ success: true, data: [], message: "No customer profile is linked to this account", requestId: req.requestId });
+    }
     const data = await prisma.quotation.findMany({
       where,
-      include: { customer: true, items: { include: { product: true } }, dealHealth: { orderBy: { createdAt: "desc" }, take: 1 } },
+      include: { customer: true, createdBy: true, negotiations: { orderBy: { createdAt: "desc" } }, items: { include: { product: true } }, dealHealth: { orderBy: { createdAt: "desc" }, take: 1 } },
       orderBy: { createdAt: "desc" }
     });
     res.json({ success: true, data, message: "Quotations fetched", requestId: req.requestId });
@@ -57,10 +60,11 @@ export async function get(req, res, next) {
       where: {
         id: req.params.id,
         companyId: req.user.companyId,
-        ...(req.user.role === "CUSTOMER" ? { customerId: req.user.customerId } : {})
+        ...(req.user.role === "CUSTOMER" && req.user.customerId ? { customerId: req.user.customerId } : {})
       },
       include: {
         customer: true,
+        createdBy: true,
         items: { include: { product: true } },
         versions: { orderBy: { versionNumber: "desc" } },
         approvals: { orderBy: { createdAt: "desc" } },
@@ -83,6 +87,24 @@ export async function submit(req, res, next) {
     const updated = await prisma.quotation.update({ where: { id: q.id }, data: { status: "PENDING_APPROVAL" } });
     await audit({ companyId: req.user.companyId, userId: req.user.id, entityType: "QUOTATION", entityId: q.id, action: "APPROVAL_REQUESTED" });
     res.json({ success: true, data: updated, message: "Quotation submitted for approval", requestId: req.requestId });
+  } catch (e) { next(e); }
+}
+
+export async function confirm(req, res, next) {
+  try {
+    const quotation = await prisma.quotation.findFirst({
+      where: { id: req.params.id, companyId: req.user.companyId, customerId: req.user.customerId }
+    });
+    if (!quotation) return res.status(404).json({ success: false, error: { code: "QUOTATION_NOT_FOUND", message: "Quotation not found", details: {} }, requestId: req.requestId });
+    if (!["APPROVED", "CUSTOMER_REVIEW"].includes(quotation.status)) {
+      return res.status(409).json({ success: false, error: { code: "QUOTATION_INVALID_STATUS", message: "Only an approved quotation can be confirmed", details: { status: quotation.status } }, requestId: req.requestId });
+    }
+    const updated = await prisma.$transaction(async tx => {
+      const result = await tx.quotation.update({ where: { id: quotation.id }, data: { status: "CUSTOMER_ACCEPTED" } });
+      await audit({ companyId: req.user.companyId, userId: req.user.id, entityType: "QUOTATION", entityId: quotation.id, action: "CUSTOMER_CONFIRMED_QUOTATION" }, tx);
+      return result;
+    });
+    res.json({ success: true, data: updated, message: "Quotation confirmed", requestId: req.requestId });
   } catch (e) { next(e); }
 }
 

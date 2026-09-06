@@ -5,7 +5,11 @@ const TIER_TONES = { Bronze: "amber", Silver: "slate", Gold: "royal" };
 
 export default function CustomerSelector({ customers = [], selected, onSelect, query, onQueryChange }) {
   const filtered = customers.filter((c) =>
-    c.name.toLowerCase().includes((query || "").toLowerCase())
+    [c.name, c.email, c.phone, c.tier, c.status]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase()
+      .includes((query || "").toLowerCase())
   );
 
   return (
@@ -32,11 +36,19 @@ export default function CustomerSelector({ customers = [], selected, onSelect, q
           >
             <span className="flex items-center gap-2">
               <Building2 className="h-4 w-4 opacity-70" />
-              {customer.name}
+              <span>
+                <span className="block">{customer.name}</span>
+                <span className={`block text-xs ${selected?.id === customer.id ? "text-royal-100" : "text-royal-400"}`}>
+                  {customer.email}{customer.phone ? ` · ${customer.phone}` : ""}
+                </span>
+              </span>
             </span>
-            <Badge tone={selected?.id === customer.id ? "royal" : TIER_TONES[customer.tier]}>
-              {customer.tier}
-            </Badge>
+            <span className="flex shrink-0 flex-col items-end gap-1">
+              <Badge tone={selected?.id === customer.id ? "royal" : TIER_TONES[customer.tier]}>
+                {customer.tier}
+              </Badge>
+              <span className="text-[10px] opacity-70">{customer.status}</span>
+            </span>
           </button>
         ))}
       </div>

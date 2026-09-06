@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { quotationsApi } from "../api/quotations.api";
+import { customerApi } from "../api/customers.api";
 
 export function useQuotations(params) {
   const [quotations, setQuotations] = useState([]);
@@ -10,7 +10,7 @@ export function useQuotations(params) {
     setLoading(true);
     setError(null);
     try {
-      const res = await quotationsApi.list(params);
+      const res = await customerApi.getQuotations(params);
       setQuotations(res.data || []);
     } catch (err) {
       setError(err.message || "Failed to load quotations");

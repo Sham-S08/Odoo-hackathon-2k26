@@ -3,19 +3,19 @@ import { Search } from "lucide-react";
 import PageHeader from "../../components/layout/PageHeader";
 import Input from "../../components/common/Input";
 import InventoryTable from "../../components/admin/InventoryTable";
-import { SAMPLE_INVENTORY } from "../../utils/sampleData";
+import { MOCK_INVENTORY } from "../../utils/adminMockData";
 
 export default function Inventory() {
   const [searchQuery, setSearchQuery] = useState("");
   const [warehouseFilter, setWarehouseFilter] = useState("");
 
-  const filteredInventory = SAMPLE_INVENTORY.filter((item) => {
+  const warehouses = [...new Set(MOCK_INVENTORY.map((item) => item.warehouseName))];
+
+  const filteredInventory = MOCK_INVENTORY.filter((item) => {
     const matchesSearch = item.productName.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesWarehouse = warehouseFilter === "" || item.warehouseName === warehouseFilter;
     return matchesSearch && matchesWarehouse;
   });
-
-  const warehouses = [...new Set(SAMPLE_INVENTORY.map((item) => item.warehouseName))];
 
   return (
     <div>
@@ -24,7 +24,6 @@ export default function Inventory() {
         description="Live stock levels by product and warehouse. Manage stock availability."
       />
 
-      {/* Filters */}
       <div className="mb-4 flex flex-wrap gap-3">
         <div className="w-64">
           <Input

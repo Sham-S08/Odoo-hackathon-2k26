@@ -8,19 +8,14 @@ import SubscriptionPlanForm from "../../components/admin/SubscriptionPlanForm";
 import Table from "../../components/common/Table";
 import Badge from "../../components/common/Badge";
 import { formatCurrency } from "../../utils/formatCurrency";
-
-const SAMPLE_PLANS = [
-  { id: "plan_1", name: "24/7 Support Plan", cadence: "Monthly", price: 99, prorationRule: "Daily proration", status: "Active" },
-  { id: "plan_2", name: "Analytics Add-on", cadence: "Yearly", price: 590, prorationRule: "Daily proration", status: "Active" },
-  { id: "plan_3", name: "Premium Support", cadence: "Quarterly", price: 250, prorationRule: "Daily proration", status: "Inactive" },
-];
+import { MOCK_SUBSCRIPTION_PLANS } from "../../utils/adminMockData";
 
 export default function SubscriptionPlans() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredPlans = SAMPLE_PLANS.filter((plan) =>
+  const filteredPlans = MOCK_SUBSCRIPTION_PLANS.filter((plan) =>
     plan.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -32,9 +27,7 @@ export default function SubscriptionPlans() {
     { 
       key: "status", 
       header: "Status", 
-      render: (r) => (
-        <Badge tone={r.status === "Active" ? "green" : "slate"}>{r.status}</Badge>
-      ) 
+      render: (r) => <Badge tone={r.status === "Active" ? "green" : "slate"}>{r.status}</Badge> 
     },
   ];
 
@@ -50,7 +43,6 @@ export default function SubscriptionPlans() {
         }
       />
 
-      {/* Search Bar */}
       <div className="mb-4 max-w-sm">
         <Input
           placeholder="Search plans..."
@@ -60,7 +52,6 @@ export default function SubscriptionPlans() {
         />
       </div>
 
-      {/* Info Banner */}
       <div className="mb-4 rounded-xl border border-blue-100 bg-blue-50/40 p-3">
         <p className="text-sm text-slate-600">
           <span className="font-medium">Note:</span> Subscription products can be mixed with one-time products in the same order.

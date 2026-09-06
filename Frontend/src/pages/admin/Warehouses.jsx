@@ -6,14 +6,14 @@ import Modal from "../../components/common/Modal";
 import Input from "../../components/common/Input";
 import WarehouseTable from "../../components/admin/WarehouseTable";
 import WarehouseForm from "../../components/admin/WarehouseForm";
-import { SAMPLE_WAREHOUSES } from "../../utils/sampleData";
+import { MOCK_WAREHOUSES } from "../../utils/adminMockData";
 
 export default function Warehouses() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredWarehouses = SAMPLE_WAREHOUSES.filter((warehouse) =>
+  const filteredWarehouses = MOCK_WAREHOUSES.filter((warehouse) =>
     warehouse.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     warehouse.location.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -30,7 +30,6 @@ export default function Warehouses() {
         }
       />
 
-      {/* Search Bar */}
       <div className="mb-4 max-w-sm">
         <Input
           placeholder="Search warehouses..."

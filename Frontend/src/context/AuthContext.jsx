@@ -2,7 +2,8 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { authApi } from "../api/auth.api";
 import { ROLES } from "../utils/constants";
 
-const DEV_MOCK_MODE = import.meta.env.VITE_ENABLE_MOCK_MODE === "true";
+// Enable mock authentication explicitly when developing without the API.
+const DEV_MOCK_MODE = import.meta.env.VITE_USE_MOCK_AUTH === "true";
 
 const AuthContext = createContext(null);
 
@@ -45,30 +46,22 @@ const MOCK_USERS = {
   },
 };
 
-const BACKEND_TO_FRONTEND_ROLE = {
-  ADMIN: ROLES.ADMIN,
-  SALES: ROLES.SALES,
-  MANAGER: ROLES.MANAGER,
-  FINANCE_MANAGER: ROLES.FINANCE,
-  CUSTOMER: ROLES.CUSTOMER,
-};
-
-const FRONTEND_TO_BACKEND_ROLE = {
-  [ROLES.ADMIN]: "ADMIN",
-  [ROLES.SALES]: "SALES",
-  [ROLES.MANAGER]: "MANAGER",
-  [ROLES.FINANCE]: "FINANCE_MANAGER",
-  [ROLES.CUSTOMER]: "CUSTOMER",
-};
-
-function toFrontendUser(user) {
-  if (!user) return null;
-
-  return {
-    ...user,
-    apiRole: user.role,
-    role: BACKEND_TO_FRONTEND_ROLE[user.role] || user.role?.toLowerCase(),
+function normalizeRole(role) {
+  const roleMap = {
+    ADMIN: ROLES.ADMIN,
+    SALES: ROLES.SALES,
+    MANAGER: ROLES.MANAGER,
+    FINANCE_MANAGER: ROLES.FINANCE,
+    FINANCE: ROLES.FINANCE,
+    CUSTOMER: ROLES.CUSTOMER,
   };
+
+  return roleMap[role] || role;
+}
+
+function normalizeUser(user) {
+  if (!user) return user;
+  return { ...user, role: normalizeRole(user.role) };
 }
 
 export function AuthProvider({ children }) {
@@ -88,6 +81,7 @@ export function AuthProvider({ children }) {
       return;
     }
 
+    // Real API mode
     const token = localStorage.getItem("df360_access_token");
     if (!token) {
       setLoading(false);
@@ -95,7 +89,7 @@ export function AuthProvider({ children }) {
     }
     authApi
       .me()
-      .then((res) => setUser(toFrontendUser(res.data.user)))
+      .then((res) => setUser(normalizeUser(res.data.user)))
       .catch(() => {
         localStorage.removeItem("df360_access_token");
       })
@@ -120,8 +114,8 @@ export function AuthProvider({ children }) {
     }
 
     const res = await authApi.login(credentials);
+    const user = normalizeUser(res.data.user);
     localStorage.setItem("df360_access_token", res.data.token);
-    const user = toFrontendUser(res.data.user);
     setUser(user);
     return user;
   }
@@ -142,14 +136,12 @@ export function AuthProvider({ children }) {
     }
 
     const res = await authApi.register({
-      companyName: payload.company,
-      name: payload.name,
-      email: payload.email,
-      password: payload.password,
-      role: FRONTEND_TO_BACKEND_ROLE[payload.role] || "SALES",
+      ...payload,
+      companyName: payload.companyName || payload.company,
+      role: payload.role === ROLES.FINANCE ? "FINANCE_MANAGER" : payload.role.toUpperCase(),
     });
+    const user = normalizeUser(res.data.user);
     localStorage.setItem("df360_access_token", res.data.token);
-    const user = toFrontendUser(res.data.user);
     setUser(user);
     return user;
   }

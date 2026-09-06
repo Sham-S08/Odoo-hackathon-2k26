@@ -11,9 +11,9 @@ import {
   Warehouse,
   Sparkles,
   BarChart3,
-  Settings,  // ← ADD THIS
   CreditCard,
   Truck,
+  User,
 } from "lucide-react";
 import { ROLES } from "../../utils/constants";
 import { AlertTriangle, Clock, TrendingUp} from "lucide-react";
@@ -29,8 +29,6 @@ const NAV_BY_ROLE = {
     { to: "/admin/inventory", label: "Inventory", icon: Boxes },
     { to: "/admin/subscription-plans", label: "Subscription Plans", icon: FileText },
     { to: "/admin/upsell-rules", label: "Upsell Rules", icon: Sparkles },
-    { to: "/admin/reports", label: "Reports", icon: BarChart3 },
-    { to: "/admin/settings", label: "Settings", icon: Settings },
   ],
   [ROLES.SALES]: [
     { to: "/sales", label: "Dashboard", icon: LayoutDashboard, end: true },
@@ -41,6 +39,7 @@ const NAV_BY_ROLE = {
   [ROLES.MANAGER]: [
     { to: "/manager", label: "Dashboard", icon: LayoutDashboard, end: true },
     { to: "/manager/approvals", label: "Approval Queue", icon: ShieldCheck },
+    { to: "/manager/negotiations", label: "Negotiations", icon: TrendingUp },
     { to: "/manager/deal-health", label: "Deal Health", icon: AlertTriangle },
     { to: "/manager/stalled-deals", label: "Stalled Deals", icon: Clock },
     { to: "/manager/discount-anomalies", label: "Discount Anomalies", icon: TrendingUp },
@@ -55,9 +54,10 @@ const NAV_BY_ROLE = {
     { to: "/finance/invoices", label: "Invoices", icon: FileText },
   ],
   [ROLES.CUSTOMER]: [
-    { to: "/portal", label: "Dashboard", icon: LayoutDashboard, end: true },
-    { to: "/portal/quotations", label: "My Quotations", icon: FileText },
-  ],
+  { to: "/portal", label: "Dashboard", icon: LayoutDashboard, end: true },
+  { to: "/portal/quotations", label: "My Quotations", icon: FileText },
+  { to: "/portal/profile", label: "Profile", icon: User },
+],
 };
 
 export default function Sidebar({ role = ROLES.SALES }) {

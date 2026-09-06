@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { negotiationsApi } from "../api/negotiations.api";
+import { customerApi } from "../api/customers.api";
 
 export function useNegotiation(quotationId) {
   const [sending, setSending] = useState(false);
@@ -9,7 +9,7 @@ export function useNegotiation(quotationId) {
     setSending(true);
     setError(null);
     try {
-      const res = await negotiationsApi.send(quotationId, payload);
+      const res = await customerApi.negotiate(quotationId, payload);
       return res.data;
     } catch (err) {
       setError(err.message || "Could not send your request");

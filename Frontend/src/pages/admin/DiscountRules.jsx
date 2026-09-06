@@ -6,22 +6,14 @@ import Modal from "../../components/common/Modal";
 import Input from "../../components/common/Input";
 import DiscountRuleTable from "../../components/admin/DiscountRuleTable";
 import DiscountRuleForm from "../../components/admin/DiscountRuleForm";
-
-const SAMPLE_RULES = [
-  { id: 1, tier: "Bronze", category: "Hardware", ceiling: 5, approvalChain: "Sales Manager" },
-  { id: 2, tier: "Silver", category: "Hardware", ceiling: 10, approvalChain: "Sales Manager" },
-  { id: 3, tier: "Gold", category: "Hardware", ceiling: 15, approvalChain: "Sales Manager" },
-  { id: 4, tier: "Gold", category: "Services", ceiling: 10, approvalChain: "Finance" },
-  { id: 5, tier: "Silver", category: "Services", ceiling: 8, approvalChain: "Sales Manager" },
-  { id: 6, tier: "Bronze", category: "Services", ceiling: 5, approvalChain: "Sales Manager" },
-];
+import { MOCK_DISCOUNT_RULES } from "../../utils/adminMockData";
 
 export default function DiscountRules() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredRules = SAMPLE_RULES.filter((rule) =>
+  const filteredRules = MOCK_DISCOUNT_RULES.filter((rule) =>
     rule.tier.toLowerCase().includes(searchQuery.toLowerCase()) ||
     rule.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -30,7 +22,7 @@ export default function DiscountRules() {
     <div>
       <PageHeader
         title="Discount Tiers & Approval Chains"
-        description="Define discount ceilings per customer tier and product category. Configure approval workflow."
+        description="Define discount ceilings per customer tier and product category."
         actions={
           <Button variant="primary" icon={Plus} onClick={() => { setEditing(null); setOpen(true); }}>
             New Rule
@@ -38,7 +30,6 @@ export default function DiscountRules() {
         }
       />
 
-      {/* Search Bar */}
       <div className="mb-4 max-w-sm">
         <Input
           placeholder="Search by tier or category..."
@@ -48,7 +39,6 @@ export default function DiscountRules() {
         />
       </div>
 
-      {/* Visual Matrix Preview */}
       <div className="mb-4 rounded-xl border border-blue-100 bg-blue-50/40 p-4">
         <p className="text-sm font-medium text-slate-700">Discount Matrix Preview</p>
         <div className="mt-2 grid grid-cols-4 gap-2 text-xs">
