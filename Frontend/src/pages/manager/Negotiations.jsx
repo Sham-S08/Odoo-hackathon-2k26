@@ -1,18 +1,61 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search } from "lucide-react";
+import { Search, MessageSquare } from "lucide-react";
 import PageHeader from "../../components/layout/PageHeader";
 import Input from "../../components/common/Input";
-import Table from "../../components/common/Table";
+import Card from "../../components/common/Card";
 import Badge from "../../components/common/Badge";
-import { formatCurrency } from "../../utils/formatCurrency";
-import { useQuotations } from "../../hooks/useQuotations";
+import { MOCK_NEGOTIATIONS } from "../../utils/managerMockData";
 
 export default function Negotiations() {
   const navigate = useNavigate();
-  const [query, setQuery] = useState("");
-  const { quotations, loading, error } = useQuotations();
-  const rows = useMemo(() => quotations.filter((quotation) => ["CUSTOMER_REVIEW", "NEGOTIATION"].includes(quotation.status)).filter((quotation) => `${quotation.id} ${quotation.customer?.name || ""}`.toLowerCase().includes(query.toLowerCase())).map((quotation) => ({ ...quotation, customerName: quotation.customer?.name || "Unknown customer", stage: quotation.status.replaceAll("_", " "), total: Number(quotation.total || 0), latestMessage: quotation.negotiations?.at?.(-1)?.message || "Customer negotiation pending" })), [quotations, query]);
-  const columns = [{ key: "id", header: "Quotation" }, { key: "customerName", header: "Customer" }, { key: "total", header: "Total", render: (row) => formatCurrency(row.total) }, { key: "stage", header: "Stage", render: (row) => <Badge tone="plum">{row.stage}</Badge> }, { key: "latestMessage", header: "Latest request" }];
-  return <div><PageHeader title="Negotiations" description="Customer quotation changes awaiting manager review" /><div className="mb-4 max-w-sm"><Input placeholder="Search quotation or customer" icon={Search} value={query} onChange={(event) => setQuery(event.target.value)} /></div>{error ? <p className="mb-4 rounded-lg bg-rose-50 p-4 text-sm text-rose-700">{error}</p> : null}<Table columns={columns} data={rows} loading={loading} emptyMessage="No customer negotiations found" onRowClick={(quotation) => navigate(`/manager/approvals/${quotation.id}`)} /></div>;
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filtered = MOCK_NEGOTIATIONS.filter((n) =>
+    n.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    n.id.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  return (
+    <div>
+      <PageHeader title="Negotiations" description="Customer negotiation requests awaiting review" />
+
+      <div className="mb-4 max-w-sm">
+        <Input placeholder="Search by customer or quotation..." icon={Search} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+      </div>
+
+      {filtered.length === 0 ? (
+        <Card>
+          <div className="py-12 text-center">
+            <MessageSquare className="mx-auto h-12 w-12 text-slate-300" />
+            <p className="mt-3 text-slate-500">No customer negotiations found</p>
+          </div>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {filtered.map((n) => (
+            <button
+              key={n.id}
+              onClick={() => navigate(`/manager/approvals/${n.quotationId}`)}
+              className="flex w-full items-center justify-between rounded-xl border border-blue-100 bg-white p-4 text-left hover:shadow-md transition-shadow"
+            >
+              <div>
+                <p className="font-medium text-slate-800">{n.customerName}</p>
+                <p className="text-sm text-slate-500">{n.message}</p>
+                <div className="mt-1 flex items-center gap-3 text-xs text-slate-400">
+                  <span>Requested: {n.requestedDiscountPercent}%</span>
+                  <span>Current: {n.currentDiscount}%</span>
+                  <span>v{n.versionNumber}</span>
+                </div>
+              </div>
+              <div className="text-right">
+                <Badge tone="amber">Pending Review</Badge>
+                <p className="mt-1 text-xs text-slate-400">{new Date(n.createdAt).toLocaleDateString()}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }

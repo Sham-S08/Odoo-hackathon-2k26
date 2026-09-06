@@ -1,40 +1,82 @@
-import { AlertTriangle, CheckCircle2, Clock, ShieldCheck, TrendingUp, XCircle } from "lucide-react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { AlertTriangle, ShieldCheck, Users, TrendingUp, CheckCircle2, XCircle, Clock } from "lucide-react";
 import PageHeader from "../../components/layout/PageHeader";
 import StatCard from "../../components/dashboard/StatCard";
 import Card from "../../components/common/Card";
-import { useApprovals } from "../../hooks/useApprovals";
-import { useQuotations } from "../../hooks/useQuotations";
+import { MOCK_MANAGER_DASHBOARD } from "../../utils/managerMockData";
 
 export default function ManagerDashboard() {
   const navigate = useNavigate();
-  const { approvals } = useApprovals();
-  const { quotations } = useQuotations();
-  const health = quotations.flatMap((quotation) => quotation.dealHealth || []);
-  const negotiations = quotations.filter((quotation) => ["CUSTOMER_REVIEW", "NEGOTIATION"].includes(quotation.status));
-  const highRisk = health.filter((item) => item.riskLevel === "HIGH").length;
-  const criticalRisk = health.filter((item) => item.riskLevel === "CRITICAL").length;
-  const stalled = quotations.filter((quotation) => Date.now() - new Date(quotation.updatedAt).getTime() > 5 * 86400000).length;
-  const riskLevels = ["LOW", "MEDIUM", "HIGH", "CRITICAL"];
-  const alerts = quotations.filter((quotation) => (quotation.dealHealth?.[0]?.riskScore || 0) >= 60).slice(0, 5);
+  const { stats, approvalSummary, riskDistribution, alerts } = MOCK_MANAGER_DASHBOARD;
 
-  return <div>
-    <PageHeader title="Manager Dashboard" description="Live approvals, negotiations, and AI deal-health overview" />
-    <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-      <StatCard label="Pending Approvals" value={approvals.length} icon={ShieldCheck} tone="amber" />
-      <StatCard label="High-Risk Deals" value={highRisk} icon={AlertTriangle} tone="rose" />
-      <StatCard label="Critical Deals" value={criticalRisk} icon={AlertTriangle} tone="red" />
-      <StatCard label="Stalled Quotations" value={stalled} icon={Clock} tone="amber" />
-      <StatCard label="Negotiations" value={negotiations.length} icon={TrendingUp} tone="blue" />
+  return (
+    <div>
+      <PageHeader 
+        title="Manager Dashboard" 
+        description="Live approvals, negotiations, and AI deal-health overview" 
+      />
+
+      {/* KPI Cards */}
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard label="Pending Approvals" value={stats.pendingApprovals} icon={ShieldCheck} tone="amber" />
+        <StatCard label="High-Risk Deals" value={stats.highRiskDeals} icon={AlertTriangle} tone="rose" />
+        <StatCard label="Critical Deals" value={stats.criticalDeals} icon={AlertTriangle} tone="red" />
+        <StatCard label="Negotiations" value={stats.negotiations} icon={Users} tone="purple" />
+      </div>
+
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard label="Approved Quotations" value={approvalSummary.approvedToday} icon={CheckCircle2} tone="green" />
+        <StatCard label="Rejected Quotations" value={approvalSummary.rejectedToday} icon={XCircle} tone="rose" />
+        <StatCard label="Pending Manager" value={approvalSummary.pendingManager} icon={ShieldCheck} tone="amber" />
+        <StatCard label="Pending Finance" value={approvalSummary.pendingFinance} icon={ShieldCheck} tone="purple" />
+      </div>
+
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+        {/* Risk Distribution */}
+        <Card title="AI Risk Distribution">
+          <div className="space-y-3">
+            {riskDistribution.map((item) => (
+              <div key={item.level} className="flex items-center justify-between">
+                <span className="text-sm text-slate-600">{item.level}</span>
+                <div className="flex items-center gap-2">
+                  <div className={`h-2 w-24 rounded-full bg-${item.color}-100`}>
+                    <div 
+                      className={`h-2 rounded-full bg-${item.color}-500`} 
+                      style={{ width: `${(item.count / 6) * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-sm font-medium text-slate-700">{item.count}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {/* Deal Health Alerts */}
+        <Card title="High-risk deal alerts">
+          <div className="space-y-2">
+            {alerts.map((alert) => (
+              <button
+                key={alert.id}
+                onClick={() => navigate(`/manager/approvals/${alert.quotationId}`)}
+                className={`flex w-full items-center gap-3 rounded-lg border p-3 text-left hover:bg-blue-50/40 transition-colors ${
+                  alert.severity === "high" ? "border-rose-200 bg-rose-50/40" : "border-amber-100 bg-amber-50/40"
+                }`}
+              >
+                <AlertTriangle className={`h-4 w-4 shrink-0 ${
+                  alert.severity === "high" ? "text-rose-500" : "text-amber-500"
+                }`} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-slate-800">{alert.title}</p>
+                  <p className="text-xs text-slate-500 truncate">{alert.description}</p>
+                </div>
+                <span className="text-xs text-blue-600">View →</span>
+              </button>
+            ))}
+          </div>
+        </Card>
+      </div>
     </div>
-    <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-      <StatCard label="Approved Quotations" value={quotations.filter((q) => q.status === "APPROVED").length} icon={CheckCircle2} tone="green" />
-      <StatCard label="Rejected Quotations" value={quotations.filter((q) => q.status === "REJECTED").length} icon={XCircle} tone="rose" />
-      <StatCard label="Total Quotations" value={quotations.length} icon={ShieldCheck} tone="purple" />
-    </div>
-    <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-      <Card title="AI Risk Distribution"><div className="space-y-3">{riskLevels.map((level) => { const count = health.filter((item) => item.riskLevel === level).length; return <div key={level} className="flex items-center justify-between"><span className="text-sm text-slate-600">{level}</span><div className="flex items-center gap-2"><div className="h-2 w-32 rounded-full bg-slate-100"><div className="h-2 rounded-full bg-blue-500" style={{ width: `${Math.min(100, count * 10)}%` }} /></div><span className="text-sm font-medium text-slate-700">{count}</span></div></div>; })}</div></Card>
-      <Card title="High-risk deal alerts"><div className="space-y-2">{alerts.length ? alerts.map((quotation) => { const item = quotation.dealHealth?.[0]; return <button key={quotation.id} onClick={() => navigate(`/manager/approvals/${quotation.id}`)} className="flex w-full items-center gap-3 rounded-lg border border-rose-100 bg-rose-50/50 p-3 text-left hover:bg-rose-50"><AlertTriangle className="h-4 w-4 shrink-0 text-rose-500" /><div className="min-w-0 flex-1"><p className="text-sm font-medium text-slate-800">{quotation.customer?.name || "Quotation"}</p><p className="truncate text-xs text-slate-500">AI risk {item?.riskScore ?? 0}/100 · {item?.riskLevel || "Unknown"}</p></div><span className="text-xs text-blue-600">Review</span></button>; }) : <p className="text-sm text-slate-500">No high-risk quotations found.</p>}</div></Card>
-    </div>
-  </div>;
+  );
 }

@@ -5,6 +5,7 @@ import { ROLES } from "../utils/constants";
 import ManagerDashboard from "../pages/manager/ManagerDashboard";
 import Approvals from "../pages/manager/Approvals";
 import ApprovalDetails from "../pages/manager/ApprovalDetails";
+import Negotiations from "../pages/manager/Negotiations";
 import DealHealth from "../pages/manager/DealHealth";
 import DiscountAnomalies from "../pages/manager/DiscountAnomalies";
 
@@ -15,6 +16,7 @@ export default function ManagerRoutes() {
         <Route index element={<ManagerDashboard />} />
         <Route path="approvals" element={<Approvals />} />
         <Route path="approvals/:id" element={<ApprovalDetails />} />
+        <Route path="negotiations" element={<Negotiations />} />
         <Route path="deal-health" element={<DealHealth />} />
         <Route path="discount-anomalies" element={<DiscountAnomalies />} />
       </Routes>
