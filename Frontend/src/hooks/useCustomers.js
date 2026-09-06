@@ -21,20 +21,6 @@ export function useCustomers(params) {
 
   useEffect(() => {
     refresh();
-    const handleCustomersChanged = () => refresh();
-    const handleStorageChange = (event) => {
-      if (event.key === "customers:changed") refresh();
-    };
-    const channel = typeof BroadcastChannel !== "undefined" ? new BroadcastChannel("dealflow-customers") : null;
-    channel?.addEventListener("message", handleCustomersChanged);
-    window.addEventListener("customers:changed", handleCustomersChanged);
-    window.addEventListener("storage", handleStorageChange);
-    return () => {
-      channel?.removeEventListener("message", handleCustomersChanged);
-      channel?.close();
-      window.removeEventListener("customers:changed", handleCustomersChanged);
-      window.removeEventListener("storage", handleStorageChange);
-    };
   }, [refresh]);
 
   return { customers, loading, error, refresh };

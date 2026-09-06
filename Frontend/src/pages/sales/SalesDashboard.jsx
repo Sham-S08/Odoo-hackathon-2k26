@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { FilePlus2, HandCoins, ShoppingBag, TrendingUp } from "lucide-react";
 import PageHeader from "../../components/layout/PageHeader";
 import StatCard from "../../components/dashboard/StatCard";
@@ -5,15 +6,12 @@ import SalesChart from "../../components/dashboard/SalesChart";
 import RecentQuotations from "../../components/dashboard/RecentQuotations";
 import Card from "../../components/common/Card";
 import Button from "../../components/common/Button";
-import { useNavigate } from "react-router-dom";
-import { useQuotations } from "../../hooks/useQuotations";
 import { formatCurrency } from "../../utils/formatCurrency";
+import { MOCK_SALES_DASHBOARD } from "../../utils/salesMockData";
 
 export default function SalesDashboard() {
   const navigate = useNavigate();
-  const { quotations } = useQuotations();
-  const pipelineQuotations = quotations.filter((q) => !["COMPLETED", "CANCELLED"].includes(q.status));
-  const pipelineValue = pipelineQuotations.reduce((sum, q) => sum + Number(q.total || 0), 0);
+  const { stats, salesTrend, recentQuotations } = MOCK_SALES_DASHBOARD;
 
   return (
     <div>
@@ -28,18 +26,39 @@ export default function SalesDashboard() {
       />
 
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <StatCard label="Open pipeline value" value={formatCurrency(pipelineValue)} change={8.4} icon={HandCoins} tone="royal" />
-        <StatCard label="Active quotations" value={pipelineQuotations.length} icon={ShoppingBag} tone="plum" />
-        <StatCard label="Approved quotations" value={quotations.filter((q) => q.status === "APPROVED").length} icon={TrendingUp} tone="emerald" />
+        <StatCard 
+          label="Open pipeline value" 
+          value={formatCurrency(stats.pipelineValue)} 
+          change={8.4} 
+          icon={HandCoins} 
+          tone="blue" 
+        />
+        <StatCard 
+          label="Active quotations" 
+          value={stats.activeQuotations} 
+          change={2} 
+          icon={ShoppingBag} 
+          tone="purple" 
+        />
+        <StatCard 
+          label="Approved quotations" 
+          value={stats.approvedQuotations} 
+          change={-3} 
+          icon={TrendingUp} 
+          tone="green" 
+        />
       </div>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
         <Card title="Sales this week" className="lg:col-span-2">
-          <p className="text-sm text-royal-500">Live pipeline value: {formatCurrency(pipelineValue)}</p>
+          <SalesChart data={salesTrend} />
         </Card>
         <Card title="Recent quotations" padded={false}>
           <div className="px-5">
-            <RecentQuotations quotations={quotations.slice(0, 5).map((quotation) => ({ ...quotation, customerName: quotation.customer?.name, total: Number(quotation.total) }))} onOpen={(q) => navigate(`/sales/quotations/${q.id}`)} />
+            <RecentQuotations 
+              quotations={recentQuotations} 
+              onOpen={(q) => navigate(`/sales/quotations/${q.id}`)} 
+            />
           </div>
         </Card>
       </div>
