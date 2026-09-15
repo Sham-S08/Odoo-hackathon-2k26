@@ -2,67 +2,54 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { authApi } from "../api/auth.api";
 import { ROLES } from "../utils/constants";
 
-// Enable mock authentication explicitly when developing without the API.
-const DEV_MOCK_MODE = import.meta.env.VITE_USE_MOCK_AUTH === "true";
+// Set to TRUE for mock mode (no backend needed)
+const DEV_MOCK_MODE = true;
 
 const AuthContext = createContext(null);
 
-// Mock user data for 5 roles
+// Mock user data for 5 roles - matched to sample data
 const MOCK_USERS = {
   admin: {
-    id: "usr_1",
-    name: "Priya Shah",
-    email: "admin@dealflow360.com",
+    id: "usr-1",
+    name: "Admin User",
+    email: "admin@dealflow360.local",
     role: ROLES.ADMIN,
     company: "DealFlow360",
+    customerName: null
   },
   sales: {
-    id: "usr_2",
-    name: "Marcus Lee",
-    email: "sales@dealflow360.com",
+    id: "usr-2",
+    name: "Sales User",
+    email: "sales@dealflow360.local",
     role: ROLES.SALES,
     company: "DealFlow360",
+    customerName: null
   },
   manager: {
-    id: "usr_3",
-    name: "Dana Okafor",
-    email: "manager@dealflow360.com",
+    id: "usr-3",
+    name: "Manager User",
+    email: "manager@dealflow360.local",
     role: ROLES.MANAGER,
     company: "DealFlow360",
+    customerName: null
   },
   finance: {
-    id: "usr_5",
-    name: "Rahul Sharma",
-    email: "finance@dealflow360.com",
+    id: "usr-5",
+    name: "Finance User",
+    email: "finance@dealflow360.local",
     role: ROLES.FINANCE,
     company: "DealFlow360",
+    customerName: null
   },
   customer: {
-    id: "usr_4",
-    name: "Acme Corp",
-    email: "customer@acme.com",
+    id: "usr-4",
+    name: "Acme Customer",
+    email: "customer@abc.local",
     role: ROLES.CUSTOMER,
-    company: "Acme Corp",
-  },
+    company: "Acme Corporation",
+    customerName: "Acme Corporation"  // ← This links to sample data
+  }
 };
-
-function normalizeRole(role) {
-  const roleMap = {
-    ADMIN: ROLES.ADMIN,
-    SALES: ROLES.SALES,
-    MANAGER: ROLES.MANAGER,
-    FINANCE_MANAGER: ROLES.FINANCE,
-    FINANCE: ROLES.FINANCE,
-    CUSTOMER: ROLES.CUSTOMER,
-  };
-
-  return roleMap[role] || role;
-}
-
-function normalizeUser(user) {
-  if (!user) return user;
-  return { ...user, role: normalizeRole(user.role) };
-}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -89,7 +76,7 @@ export function AuthProvider({ children }) {
     }
     authApi
       .me()
-      .then((res) => setUser(normalizeUser(res.data.user)))
+      .then((res) => setUser(res.data))
       .catch(() => {
         localStorage.removeItem("df360_access_token");
       })
@@ -104,7 +91,7 @@ export function AuthProvider({ children }) {
       if (email.includes("admin")) role = ROLES.ADMIN;
       else if (email.includes("manager")) role = ROLES.MANAGER;
       else if (email.includes("finance")) role = ROLES.FINANCE;
-      else if (email.includes("customer")) role = ROLES.CUSTOMER;
+      else if (email.includes("customer") || email.includes("abc")) role = ROLES.CUSTOMER;
       else if (email.includes("sales")) role = ROLES.SALES;
 
       const mockUser = MOCK_USERS[role];
@@ -114,10 +101,9 @@ export function AuthProvider({ children }) {
     }
 
     const res = await authApi.login(credentials);
-    const user = normalizeUser(res.data.user);
-    localStorage.setItem("df360_access_token", res.data.token);
-    setUser(user);
-    return user;
+    localStorage.setItem("df360_access_token", res.data.accessToken);
+    setUser(res.data.user);
+    return res.data.user;
   }
 
   async function register(payload) {
@@ -129,21 +115,17 @@ export function AuthProvider({ children }) {
         email: payload.email,
         role: role,
         company: payload.company,
+        customerName: role === ROLES.CUSTOMER ? payload.company : null
       };
       localStorage.setItem("df360_mock_token", role);
       setUser(mockUser);
       return mockUser;
     }
 
-    const res = await authApi.register({
-      ...payload,
-      companyName: payload.companyName || payload.company,
-      role: payload.role === ROLES.FINANCE ? "FINANCE_MANAGER" : payload.role.toUpperCase(),
-    });
-    const user = normalizeUser(res.data.user);
-    localStorage.setItem("df360_access_token", res.data.token);
-    setUser(user);
-    return user;
+    const res = await authApi.register(payload);
+    localStorage.setItem("df360_access_token", res.data.accessToken);
+    setUser(res.data.user);
+    return res.data.user;
   }
 
   async function logout() {

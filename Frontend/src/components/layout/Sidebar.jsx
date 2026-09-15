@@ -57,10 +57,10 @@ const NAV_BY_ROLE = {
   { to: "/finance/invoices", label: "Invoices", icon: FileText },
 ],
   [ROLES.CUSTOMER]: [
-    { to: "/portal", label: "Dashboard", icon: LayoutDashboard, end: true },
-    { to: "/portal/quotations", label: "My Quotations", icon: FileText },
-    { to: "/portal/profile", label: "Profile", icon: Users },
-  ],
+  { to: "/portal", label: "Dashboard", icon: LayoutDashboard, end: true },
+  { to: "/portal/quotations", label: "My Quotations", icon: FileText },
+  { to: "/portal/profile", label: "Profile", icon: Users },
+],
 };
 
 export default function Sidebar({ role = ROLES.SALES }) {

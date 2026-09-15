@@ -1,36 +1,66 @@
-# Security & Credentials (CRITICAL - DO NOT REMOVE)
+# ================================
+# Environment & Security
+# ================================
 .env
 *.env
+.env.*
 !.env.example
 *.pem
 *.key
 
-# Python virtual environment
-.venv/
-venv/
-env/
-ENV/
+# ================================
+# Logs & Coverage
+# ================================
+*.log
+coverage/
+.coverage
+htmlcov/
 
-# Python cache & compiled files
+# ================================
+# Python Cache & Compiled Files
+# ================================
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .pytest_cache/
-.coverage
-htmlcov/
+.mypy_cache/
+.ruff_cache/
 
-# Operating System & IDE
-.DS_Store
-Thumbs.db
-.vscode/
-.idea/
-*.swp
+# ================================
+# Python Virtual Environment
+# ================================
+.venv/
+venv/
+env/
+ENV/
 
-# Node / Frontend artifacts (if any pulled)
+# ================================
+# Node / Frontend
+# ================================
 node_modules/
 dist/
 build/
 .next/
+.vite/
 npm-debug.log*
-.env
+
+# ================================
+# Tool Caches
+# ================================
+.eslintcache
+
+# ================================
+# Test Reports
+# ================================
+playwright-report/
+test-results/
+
+# ================================
+# IDE & OS
+# ================================
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
